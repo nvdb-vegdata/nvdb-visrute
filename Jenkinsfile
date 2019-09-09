@@ -65,12 +65,10 @@ pipeline {
     }
     post {
         success {
-            hipchatSend(color: 'GREEN',
-            message: 'OK')
+           echo 'Success'
         }
         failure {
-            hipchatSend(color: 'RED',
-            message: 'FAIL')
+            echo 'Failure'
         }
     }
 }
