@@ -28,11 +28,18 @@
     <div id="mapid" class="map_container"></div>
 
     <form action="#">
-        <button id="beregn_marker">Beregn rute med markører</button>
-        <div></div>
-        <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
-        <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">
-        <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.04958@1175526">
+        <div>
+            <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
+            <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">
+            <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.04958@1175526">
+        </div>
+        <div>
+            <button id="beregn_marker">Beregn rute med markører</button> med maks_avstand:
+            <input type="text" name="maksavstand" placeholder="maksavstand" value="10">
+        </div>
+        <div align="right">
+            <button id="tom_ruter">Fjern beregnede ruter</button>
+            <button id="tom_marker">Fjern start- og slutt-markør</button></div>
     </form>
 </main>
 
