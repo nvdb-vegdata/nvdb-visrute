@@ -7,7 +7,7 @@ const bakgrunnsLag = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{
     accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
 });
 
-const baseurl = "http://localhost:12002";
+const baseurl = "https://nvdbw01.kantega.no/nvdb/api/v3";
 const map = L.map('mapid');
 const layerGroupRoute = L.layerGroup().addTo(map);
 const layerGroupMarker = L.layerGroup().addTo(map);
