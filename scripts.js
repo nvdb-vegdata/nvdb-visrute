@@ -63,10 +63,12 @@ $("#beregn_marker").click(function () {
         var start = convert(startMarker.getLatLng());
         var end = convert(endMarker.getLatLng());
         var avstand = $('input[name="maksavstand"]').val();
+        var ramme = $('input[name="ramme"]').val();
         var myurl = baseurl + "/beta/vegnett/rute"
             + "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
-            + "&maks_avstand=" + avstand;
+            + "&maks_avstand=" + avstand
+            + "&ramme=" + ramme;
 
         getData(myurl);
     } else {
