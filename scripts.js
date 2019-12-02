@@ -39,7 +39,7 @@ function getData(url) {
             };
         L.Proj.geoJson(geojson).addTo(layerGroupRoute);
     });
-        if (result.length == 0) alert ("Ingen treff!   Forsøk å snu start- og slutt-markør!");
+        if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
     });
 }
 
@@ -63,12 +63,12 @@ $("#beregn_marker").click(function () {
         var start = convert(startMarker.getLatLng());
         var end = convert(endMarker.getLatLng());
         var avstand = $('input[name="maksavstand"]').val();
-        var ramme = $('input[name="ramme"]').val();
+        var omkrets = $('input[name="omkrets"]').val();
         var myurl = baseurl + "/beta/vegnett/rute"
             + "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
-            + "&ramme=" + ramme;
+            + "&omkrets=" + omkrets;
 
         getData(myurl);
     } else {
