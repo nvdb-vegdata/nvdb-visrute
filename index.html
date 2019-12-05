@@ -21,6 +21,15 @@
     <div id="mapid" class="map_container"></div>
 
     <form action="#">
+        Server:
+        <select id="server">
+            <option value="https://nvdbw01.kantega.no/nvdb/api/v3">https://nvdbw01.kantega.no/nvdb/api/v3 </option>
+            <option value="https://www.test.vegvesen.no/nvdb/api/v3">https://www.test.vegvesen.no/nvdb/api/v3</option>
+            <option value="https://www.utv.vegvesen.no/nvdb/api/v3">https://www.utv.vegvesen.no/nvdb/api/v3</option>
+            <option value="https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3">https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3</option>
+            <option value="http://localhost:12002">http://localhost:12002</option>
+        </select>
+        <br>
         <div>
             <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
             <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">

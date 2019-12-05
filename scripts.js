@@ -10,7 +10,8 @@ const bakgrunnsLag = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
 
-const baseurl = "http://localhost:12002";
+// const baseurl = "http://localhost:12002";
+
 const map = L.map('mapid');
 const layerGroupRoute = L.layerGroup().addTo(map);
 const layerGroupMarker = L.layerGroup().addTo(map);
@@ -56,9 +57,11 @@ $("#setMarkers").click(function (e) {
     layerGroupMarker.clearLayers();
     endMarker = null;
     startMarker = null;
-    createEndMarker(convertUMT33ToWGS84LatLong(end));
-    createStartMarker(convertUMT33ToWGS84LatLong(start));
+    createEndMarker(convertUTM33ToWGS84LatLong(end));
+    createStartMarker(convertUTM33ToWGS84LatLong(start));
 });
+
+
 
 $("#beregn_marker").click(function (e) {
     event.preventDefault();
@@ -67,7 +70,7 @@ $("#beregn_marker").click(function (e) {
         var end = convertWGS84ToUTM33Coordinates(endMarker.getLatLng());
         var avstand = $('input[name="maksavstand"]').val();
         var omkrets = $('input[name="omkrets"]').val();
-        var myurl = baseurl + "/beta/vegnett/rute"
+        var myurl = getBaseUrl() + "/beta/vegnett/rute"
             + "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
@@ -85,7 +88,7 @@ $("#beregn_lenke").click(function (e) {
     var slutt = $('input[name="sluttlenke"]').val();
 
     if (start && slutt) {
-        var myurl = baseurl + "/beta/vegnett/rute"
+        var myurl = getBaseUrl() + "/beta/vegnett/rute"
             + "?start=" + start
             + "&slutt=" + slutt;
 
@@ -106,6 +109,10 @@ $('#clearMarkers').click(function (e) {
     endMarker = null;
     startMarker = null;
 });
+
+function getBaseUrl() {
+    return $("#server option:selected").text();
+}
 
 function createStartMarker(e) {
     startMarker = L.marker(e.latlng,{draggable:true})
@@ -147,7 +154,7 @@ function convertWGS84ToUTM33Coordinates(latlong) {
     return proj4(WGS84,UTM33,[latlong.lng, latlong.lat]);
 }
 
-function convertUMT33ToWGS84LatLong(utm) {
+function convertUTM33ToWGS84LatLong(utm) {
     var xy = utm.split(",");
     var transformed = proj4(UTM33, WGS84, [(parseFloat(xy[0])),(parseFloat(xy[1]))]);
     return  { "latlng" :
