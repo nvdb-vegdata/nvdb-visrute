@@ -65,6 +65,7 @@ $("#setMarkers").click(function (e) {
 
 $("#beregn_marker").click(function (e) {
     event.preventDefault();
+    clearRoute();
     if (startMarker && endMarker) {
         var start = convertWGS84ToUTM33Coordinates(startMarker.getLatLng());
         var end = convertWGS84ToUTM33Coordinates(endMarker.getLatLng());
@@ -82,8 +83,27 @@ $("#beregn_marker").click(function (e) {
     }
 });
 
+
+$("#beregn_geometri").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    var geometri = $.trim($('#geometri').val());
+    var avstand = $('input[name="maksavstand"]').val();
+
+    if (geometri && avstand) {
+        var myurl = getBaseUrl() + "/beta/vegnett/rute"
+            + "?geometri=" + geometri
+            + "&maks_avstand=" + avstand
+
+        getData(myurl);
+    } else {
+        alert("Geometri må ha verdi!");
+    }
+});
+
 $("#beregn_lenke").click(function (e) {
     event.preventDefault();
+    clearRoute();
     var start = $('input[name="startlenke"]').val();
     var slutt = $('input[name="sluttlenke"]').val();
 
@@ -109,6 +129,12 @@ $('#clearMarkers').click(function (e) {
     endMarker = null;
     startMarker = null;
 });
+
+function clearRoute() {
+    if ($('#clearRoute').is(":checked")) {
+        layerGroupRoute.clearLayers();
+    }
+}
 
 function getBaseUrl() {
     return $("#server option:selected").text();

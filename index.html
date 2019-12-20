@@ -21,41 +21,50 @@
     <div id="mapid" class="map_container"></div>
 
     <form action="#">
-        Server:
-        <select id="server">
-            <option value="https://nvdbw01.kantega.no/nvdb/api/v3">https://nvdbw01.kantega.no/nvdb/api/v3 </option>
-            <option value="https://www.test.vegvesen.no/nvdb/api/v3">https://www.test.vegvesen.no/nvdb/api/v3</option>
-            <option value="https://www.utv.vegvesen.no/nvdb/api/v3">https://www.utv.vegvesen.no/nvdb/api/v3</option>
-            <option value="https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3">https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3</option>
-            <option value="http://localhost:12002">http://localhost:12002</option>
-        </select>
-        <br>
-        <div>
-            <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
-            <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">
-            <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.04958@1175526">
-        </div>
-
         <table>
             <tr>
+                <td>
+                    Server:
+                    <select id="server">
+                        <option value="https://nvdbw01.kantega.no/nvdb/api/v3">https://nvdbw01.kantega.no/nvdb/api/v3</option>
+                        <option value="https://www.test.vegvesen.no/nvdb/api/v3">https://www.test.vegvesen.no/nvdb/api/v3</option>
+                        <option value="https://www.utv.vegvesen.no/nvdb/api/v3">https://www.utv.vegvesen.no/nvdb/api/v3</option>
+                        <option value="https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3">https://leseapi-v3.utv.vegvesen.no/nvdb/api/v3</option>
+                        <option value="http://localhost:12002">http://localhost:12002</option>
+                    </select>
+                </td>
                 <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="maksavstand" value="10"></td>
-                <td>Omkrets rundt punkter på meter: <input type="text" name="omkrets" placeholder="omkrets" value="100"></td>
+                <td><input type="checkbox" id="clearRoute" checked="true" value="clear">Slett beregnede ruter</td>
             </tr>
         </table>
 
-        <div align="right">
-            <button id="clearRoutes">Fjern beregnede ruter</button>
-            <button id="clearMarkers">Fjern start- og slutt-markør</button>
-        </div>
+        <hr>
 
+        <div>
+            Startlenke: <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">
+            Sluttlenke: <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.04958@1175526">
+            <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
+        </div>
+        <hr>
+        <div>
+            Omkrets rundt punkter på meter: <input type="text" name="omkrets" placeholder="omkrets" value="100">
+        </div>
         <div>
             Start markør (x,y): <input type="text" name="startMarker" placeholder="x,y" size="35" value="226807.754, 6564543.275">
             <button id="setMarkers">Set markører</button>
+            <button id="clearMarkers">Fjern start- og slutt-markør</button>
         </div>
         <div>
             Slutt markør (x,y): <input type="text" name="endMarker" placeholder="x,y" size="35" value="226981.7045, 6564373.955">
             <button id="beregn_marker">Beregn rute med markører</button>
         </div>
+        <hr>
+        <div>
+            Geometri:
+            <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(227170.659 6564015.405 1, 227168.5 6564015 1, 227161.794 6564014.66 1, 227155 6564015.7 1, 227148.9 6564018 1, 227146.785 6564019.288 1, 227143.706 6564021.734 1, 227141.501 6564023.698 1)</textarea>
+            <button id="beregn_geometri">Beregn rute med geometri</button>
+        </div>
+
     </form>
 </main>
 
