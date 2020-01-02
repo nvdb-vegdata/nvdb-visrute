@@ -29,23 +29,22 @@ function getData(url) {
     console.log('Fetching ' + url);
     fetch(url)
         .then(function (response) {
-            return response.json()
+                return response.json()
         }).then(function (result) {
-
-        result.flatMap(o => o.elementer)
-    .flatMap(g => g.geometri.wkt)
-    .map(wkt => Terraformer.WKT.parse(wkt))
-    .forEach(geojson => {
-            geojson.crs = {
-                'type': 'name',
-                'properties': {
-                    'name': 'urn:ogc:def:crs:EPSG::25833'
-                }
-            };
-        L.Proj.geoJson(geojson).addTo(layerGroupRoute);
-    });
-        if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
-    });
+            result.flatMap(o => o.elementer)
+                .flatMap(g => g.geometri.wkt)
+                .map(wkt => Terraformer.WKT.parse(wkt))
+                .forEach(geojson => {
+                    geojson.crs = {
+                        'type': 'name',
+                        'properties': {
+                        'name': 'urn:ogc:def:crs:EPSG::25833'
+                        }
+                    };
+                    L.Proj.geoJson(geojson).addTo(layerGroupRoute);
+                });
+            if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+        });
 }
 
 map.on('click', onMapClick);
