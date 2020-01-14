@@ -105,11 +105,13 @@ $("#beregn_lenke").click(function (e) {
     clearRoute();
     var start = $('input[name="startlenke"]').val();
     var slutt = $('input[name="sluttlenke"]').val();
+    var avstand = $('input[name="maksavstand"]').val();
 
     if (start && slutt) {
         var myurl = getBaseUrl() + "/beta/vegnett/rute"
             + "?start=" + start
-            + "&slutt=" + slutt;
+            + "&slutt=" + slutt
+            + "&maks_avstand=" + avstand;
 
         getData(myurl);
     } else {
