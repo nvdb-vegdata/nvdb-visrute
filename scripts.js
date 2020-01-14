@@ -138,7 +138,7 @@ function clearRoute() {
 }
 
 function getBaseUrl() {
-    return $("#server option:selected").text();
+    return $('#server').val();
 }
 
 function createStartMarker(e) {
