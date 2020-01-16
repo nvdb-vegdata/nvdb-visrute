@@ -29,23 +29,22 @@ function getData(url) {
     console.log('Fetching ' + url);
     fetch(url)
         .then(function (response) {
-            return response.json()
+                return response.json()
         }).then(function (result) {
-
-        result.flatMap(o => o.elementer)
-    .flatMap(g => g.geometri.wkt)
-    .map(wkt => Terraformer.WKT.parse(wkt))
-    .forEach(geojson => {
-            geojson.crs = {
-                'type': 'name',
-                'properties': {
-                    'name': 'urn:ogc:def:crs:EPSG::25833'
-                }
-            };
-        L.Proj.geoJson(geojson).addTo(layerGroupRoute);
-    });
-        if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
-    });
+            result.flatMap(o => o.elementer)
+                .flatMap(g => g.geometri.wkt)
+                .map(wkt => Terraformer.WKT.parse(wkt))
+                .forEach(geojson => {
+                    geojson.crs = {
+                        'type': 'name',
+                        'properties': {
+                        'name': 'urn:ogc:def:crs:EPSG::25833'
+                        }
+                    };
+                    L.Proj.geoJson(geojson).addTo(layerGroupRoute);
+                });
+            if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+        });
 }
 
 map.on('click', onMapClick);
@@ -65,6 +64,7 @@ $("#setMarkers").click(function (e) {
 
 $("#beregn_marker").click(function (e) {
     event.preventDefault();
+    clearRoute();
     if (startMarker && endMarker) {
         var start = convertWGS84ToUTM33Coordinates(startMarker.getLatLng());
         var end = convertWGS84ToUTM33Coordinates(endMarker.getLatLng());
@@ -82,15 +82,36 @@ $("#beregn_marker").click(function (e) {
     }
 });
 
+
+$("#beregn_geometri").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    var geometri = $.trim($('#geometri').val());
+    var avstand = $('input[name="maksavstand"]').val();
+
+    if (geometri && avstand) {
+        var myurl = getBaseUrl() + "/beta/vegnett/rute"
+            + "?geometri=" + geometri
+            + "&maks_avstand=" + avstand
+
+        getData(myurl);
+    } else {
+        alert("Geometri må ha verdi!");
+    }
+});
+
 $("#beregn_lenke").click(function (e) {
     event.preventDefault();
+    clearRoute();
     var start = $('input[name="startlenke"]').val();
     var slutt = $('input[name="sluttlenke"]').val();
+    var avstand = $('input[name="maksavstand"]').val();
 
     if (start && slutt) {
         var myurl = getBaseUrl() + "/beta/vegnett/rute"
             + "?start=" + start
-            + "&slutt=" + slutt;
+            + "&slutt=" + slutt
+            + "&maks_avstand=" + avstand;
 
         getData(myurl);
     } else {
@@ -110,8 +131,14 @@ $('#clearMarkers').click(function (e) {
     startMarker = null;
 });
 
+function clearRoute() {
+    if ($('#clearRoute').is(":checked")) {
+        layerGroupRoute.clearLayers();
+    }
+}
+
 function getBaseUrl() {
-    return $("#server option:selected").text();
+    return $('#server').val();
 }
 
 function createStartMarker(e) {
