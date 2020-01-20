@@ -28,7 +28,7 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 function getData(urlParams) {
     console.log('Fetching ' + urlParams);
 
-    let shortFormURL = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&kortform=true";
+    let shortFormURL = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&kortform=true" + "&pretty=true";
     // Show the short format in info
     fetch(shortFormURL)
         .then(function (response) {
@@ -37,7 +37,7 @@ function getData(urlParams) {
             $('#shortform').text(result);
     });
 
-    let longFormUrl = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams;
+    let longFormUrl = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
     // Display the long format in the map
     fetch(longFormUrl)
         .then(function (response) {
@@ -83,7 +83,6 @@ $("#routeByMarkers").click(function (e) {
             "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
-            + "&pretty=true"
             + "&omkrets=" + omkrets;
 
         getData(urlParams);
@@ -101,7 +100,6 @@ $("#routeByGeometry").click(function (e) {
     if (geometri && avstand) {
         let urlParams =
             "?geometri=" + geometri
-            + "&pretty=true"
             + "&maks_avstand=" + avstand
 
         getData(urlParams);
