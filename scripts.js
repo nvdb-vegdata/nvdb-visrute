@@ -21,7 +21,7 @@ let endMarker = null;
 
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
 MAP.addLayer(BACKGROUND_LAYER);
-MAP.setView([59.129641, 10.224452018737795], 15);
+MAP.setView([59.132, 10.22], 17);
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 
@@ -62,6 +62,10 @@ MAP.on('click', onMapClick);
 
 $("#setMarkers").click(function (e) {
     event.preventDefault();
+    setMarkers();
+});
+
+function setMarkers() {
     let start = $('input[name="startMarker"]').val();
     let end = $('input[name="endMarker"]').val();
     LAYERGROUP_MARKER.clearLayers();
@@ -69,7 +73,7 @@ $("#setMarkers").click(function (e) {
     startMarker = null;
     createEndMarker(convertUTM33ToWGS84LatLong(end));
     createStartMarker(convertUTM33ToWGS84LatLong(start));
-});
+}
 
 $("#routeByMarkers").click(function (e) {
     event.preventDefault();
@@ -132,6 +136,10 @@ $('#clearRoutes').click(function (e) {
     LAYERGROUP_ROUTE.clearLayers();
 });
 
+$('#showMarkerLatLng').click(function() {
+    setMarkers();
+});
+
 $('#clearMarkers').click(function (e) {
     event.preventDefault();
     LAYERGROUP_MARKER.clearLayers();
@@ -145,32 +153,42 @@ function clearRoute() {
     }
 }
 
+function showLatLong() {
+    return ($('#showMarkerLatLng').is(":checked"));
+}
+
+function tooltipLatLng(latlong) {
+    return showLatLong() ? " (LatLng(" + latlong.lat + ", " + latlong.lng + ")" : "";
+}
+
 function getServerUrl() {
     return $('#server').val();
 }
 
 function createStartMarker(e) {
     startMarker = L.marker(e.latlng,{draggable:true})
-        .bindTooltip("Start",{permanent: true, direction: 'right'})
+        .bindTooltip("Start" + tooltipLatLng(e.latlng), {permanent: true, direction: 'right'})
         .addTo(LAYERGROUP_MARKER);
 
     $('input[name="startMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
     startMarker.on("drag", function (e) {
         let marker = e.target;
+        marker.bindTooltip("Start" + tooltipLatLng(marker.getLatLng()));
         $('input[name="startMarker"]').val(convertWGS84ToUTM33Coordinates(marker.getLatLng()));
     });
 }
 
 function createEndMarker(e) {
     endMarker = L.marker(e.latlng,{draggable:true})
-        .bindTooltip("Slutt",{permanent: true, direction: 'right'})
+        .bindTooltip("Slutt" + tooltipLatLng(e.latlng),{permanent: true, direction: 'right'})
         .addTo(LAYERGROUP_MARKER);
 
     $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
     endMarker.on("drag", function (e) {
         let marker = e.target;
+         marker.bindTooltip("Slutt" + tooltipLatLng(marker.getLatLng()));
         $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(marker.getLatLng()));
     });
 }
@@ -192,6 +210,6 @@ function convertWGS84ToUTM33Coordinates(latlong) {
 function convertUTM33ToWGS84LatLong(utm) {
     let xy = utm.split(",");
     let transformed = proj4(UTM33, WGS84, [(parseFloat(xy[0])),(parseFloat(xy[1]))]);
-    return  { "latlng" :
-            {"lng" : transformed[0], "lat" : transformed[1]}};
+    return  {"latlng" :
+            {"lat" : transformed[1], "lng" : transformed[0]}};
 }
