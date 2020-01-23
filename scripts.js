@@ -43,7 +43,7 @@ function getData(urlParams) {
         .then(function (response) {
                 return response.json()
         }).then(function (result) {
-            result.elementer.flatMap(o => o.geometri.wkt)
+            result.flatMap(o => o.geometri.wkt)
                 .map(wkt => Terraformer.WKT.parse(wkt))
                 .forEach(geojson => {
                     geojson.crs = {
