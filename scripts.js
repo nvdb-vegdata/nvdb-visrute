@@ -87,7 +87,9 @@ $("#routeByMarkers").click(function (e) {
             "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
-            + "&omkrets=" + omkrets;
+            + "&omkrets=" + omkrets
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks();
 
         getData(urlParams);
     } else {
@@ -136,7 +138,11 @@ $('#clearRoutes').click(function (e) {
     LAYERGROUP_ROUTE.clearLayers();
 });
 
-$('#showMarkerLatLng').click(function() {
+$('#showMarkerPos').click(function() {
+    setMarkers();
+});
+
+$("#POS_UTM33,#POS_WGS84").change(function() {
     setMarkers();
 });
 
@@ -153,12 +159,31 @@ function clearRoute() {
     }
 }
 
-function showLatLong() {
-    return ($('#showMarkerLatLng').is(":checked"));
+function showPos(){
+    return $('#showMarkerPos').is(':checked');
+}
+
+function showLatLongWGS84() {
+    return $('#POS_WGS84').is(':checked');
+}
+
+function showLatLongUTM33() {
+    return $('#POS_UTM33').is(':checked');
+}
+function isConnectionLinks() {
+    return $('#connectionLinks').is(':checked');
+}
+
+function isDetailedLinks() {
+    return $('#detailedLinks').is(':checked');
 }
 
 function tooltipLatLng(latlong) {
-    return showLatLong() ? " (LatLng(" + latlong.lat + ", " + latlong.lng + ")" : "";
+    if (showPos()) {
+        if (showLatLongWGS84()) return " (" + latlong.lat + ", " + latlong.lng + ")";
+        if (showLatLongUTM33()) return " (" + convertWGS84ToUTM33Coordinates(latlong) + ")";
+    }
+    return "";
 }
 
 function getServerUrl() {
