@@ -10,7 +10,7 @@ const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
 
-const MAP = L.map('mapid');
+const MAP = L.map('map');
 const LAYERGROUP_ROUTE = L.layerGroup().addTo(MAP);
 const LAYERGROUP_MARKER = L.layerGroup().addTo(MAP);
 
@@ -28,37 +28,54 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 function getData(urlParams) {
     console.log('Fetching ' + urlParams);
 
-    let shortFormURL = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&kortform=true" + "&pretty=true";
-    // Show the short format in info
-    fetch(shortFormURL)
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
+
+    // Get the detailed format
+    fetch(url)
+        .then(function (response) {
+            response.clone().json()
+
+                // Detailed segments drawn in map
+                .then(function (result) {
+                    result.flatMap(o => o.geometri.wkt)
+                        .map(wkt => Terraformer.WKT.parse(wkt))
+                        .forEach(geojson => {
+                            geojson.crs = {
+                                'type': 'name',
+                                'properties': {
+                                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                                }
+                            };
+                            L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
+                        });
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+                });
+
+            // Detailed segments as text
+            response.text()
+                .then(function (result) {
+                    $('#detailedFormatText').text(result);
+                });
+        });
+
+    // Brief segments as text
+    fetch(url + "&kortform=true")
         .then(function (response) {
             return response.text()
-        }).then(function (result) {
-            $('#shortform').text(result);
-    });
-
-    let longFormUrl = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
-    // Display the long format in the map
-    fetch(longFormUrl)
-        .then(function (response) {
-                return response.json()
-        }).then(function (result) {
-            result.flatMap(o => o.geometri.wkt)
-                .map(wkt => Terraformer.WKT.parse(wkt))
-                .forEach(geojson => {
-                    geojson.crs = {
-                        'type': 'name',
-                        'properties': {
-                        'name': 'urn:ogc:def:crs:EPSG::25833'
-                        }
-                    };
-                    L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
+                .then(function (result) {
+                   $('#briefFormatText').text(result);
                 });
-            if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
-        });
+        })
 }
 
 MAP.on('click', onMapClick);
+
+$("#detailedFormat").hide();
+
+$("#briefResponseFormat,#detailedResponseFormat").click(function(){
+    $("#detailedFormat").toggle();
+    $("#briefFormat").toggle();
+});
 
 $("#setMarkers").click(function (e) {
     event.preventDefault();
@@ -91,10 +108,22 @@ $("#routeByMarkers").click(function (e) {
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks();
 
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
         getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
+});
+
+function isRoadRef() {
+    return $('#roadsysref').val().trim().length > 0;
+}
+
+$("#resetroadref").click(function(e) {
+    event.preventDefault();
+    $("#roadsysref").val("");
 });
 
 $("#routeByGeometry").click(function (e) {
@@ -106,7 +135,11 @@ $("#routeByGeometry").click(function (e) {
     if (geometri && avstand) {
         let urlParams =
             "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
+            + "&maks_avstand=" + avstand;
+
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
 
         getData(urlParams);
     } else {
@@ -213,7 +246,7 @@ function createEndMarker(e) {
 
     endMarker.on("drag", function (e) {
         let marker = e.target;
-         marker.bindTooltip("Slutt" + tooltipLatLng(marker.getLatLng()));
+        marker.bindTooltip("Slutt" + tooltipLatLng(marker.getLatLng()));
         $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(marker.getLatLng()));
     });
 }
