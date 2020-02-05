@@ -12,7 +12,8 @@
 
     <style>
         #map {height: 600px; width: 70%; float: left; }
-        #info {height: 600px; width: 30%; overflow:scroll; float: right; }
+        #response {height: 600px; width: 30%; float: right; }
+        #responsetext {height: 550px; overflow: scroll; }
     </style>
 </head>
 
@@ -20,12 +21,20 @@
 <main>
     <div>
         <div id="map"></div>
-        <div id="info">
-            <div id="briefFormat">
-                <pre id="briefFormatText"></pre>
-            </div>
-            <div id="detailedFormat">
-                <pre id="detailedFormatText"></pre>
+        <div id="response">
+            Vis response i
+            <input type="radio" name="respformat" id="briefResponseFormat" checked="true">Kort format
+            <input type="radio" name="respformat" id="detailedResponseFormat">Detaljert format
+            <hr>
+            <div id="responsetext">
+                <div id="briefFormat">
+                    <div id="requesturlbrief"></div>
+                    <pre id="briefFormatText"></pre>
+                </div>
+                <div id="detailedFormat">
+                    <div id="requesturldetailed"></div>
+                    <pre id="detailedFormatText"></pre>
+                </div>
             </div>
         </div>
     </div>
@@ -62,9 +71,7 @@
 <!--                    <button type="button" id="resetroadref">X</button>-->
 <!--                </td>-->
                 <td>
-                    Vis response i
-                    <input type="radio" name="respformat" id="briefResponseFormat" checked="true">Kort format
-                    <input type="radio" name="respformat" id="detailedResponseFormat">Detaljert format
+
                 </td>
             </tr>
         </table>
