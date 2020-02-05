@@ -25,6 +25,15 @@ MAP.setView([59.132, 10.22], 17);
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 
+function setURL(briefURL, requestUrlDiv) {
+    $(requestUrlDiv).empty();
+    $('<a>', {
+        text: briefURL,
+        href: briefURL,
+        target: "_blank"
+    }).appendTo($(requestUrlDiv));
+}
+
 function getData(urlParams) {
     console.log('Fetching ' + urlParams);
 
@@ -54,16 +63,19 @@ function getData(urlParams) {
             // Detailed segments as text
             response.text()
                 .then(function (result) {
+                    setURL(url, "#requesturldetailed");
                     $('#detailedFormatText').text(result);
                 });
         });
 
     // Brief segments as text
-    fetch(url + "&kortform=true")
+    let briefURL = url + "&kortform=true";
+    fetch(briefURL)
         .then(function (response) {
             return response.text()
                 .then(function (result) {
-                   $('#briefFormatText').text(result);
+                    setURL(briefURL, "#requesturlbrief");
+                    $('#briefFormatText').text(result);
                 });
         })
 }
