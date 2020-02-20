@@ -9,17 +9,35 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
           crossorigin=""/>
+
     <style>
-        #mapid {
-            height: 600px;
-        }
+        #map {height: 600px; width: 70%; float: left; }
+        #response {height: 600px; width: 30%; float: right; }
+        #responsetext {height: 550px; overflow: scroll; }
     </style>
 </head>
 
 <body>
 <main>
-    <div id="mapid" class="map_container"></div>
-
+    <div>
+        <div id="map"></div>
+        <div id="response">
+            Vis response i
+            <input type="radio" name="respformat" id="briefResponseFormat" checked="true">Kort format
+            <input type="radio" name="respformat" id="detailedResponseFormat">Detaljert format
+            <hr>
+            <div id="responsetext">
+                <div id="briefFormat">
+                    <div id="requesturlbrief"></div>
+                    <pre id="briefFormatText"></pre>
+                </div>
+                <div id="detailedFormat">
+                    <div id="requesturldetailed"></div>
+                    <pre id="detailedFormatText"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
     <form action="#">
         <table>
             <tr>
@@ -37,38 +55,51 @@
                         <option value="http://localhost:12002">http://localhost:12002 (localhost for developers)</option>
                     </select>
                 </td>
-                <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="maksavstand" value="10"></td>
-                <td><input type="checkbox" id="clearRoute" checked="true" value="clear">Slett beregnede ruter</td>
+                <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="avstand" value="10"></td>
+                <td><input type="checkbox" id="clearRoute" checked="true">Slett beregnede ruter</td>
+                <td>
+                    <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
+                    <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
+                    <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
+                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
+<!--                <td>-->
+<!--                    Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse" size="30">-->
+<!--                    <button type="button" id="resetroadref">X</button>-->
+<!--                </td>-->
+                <td>
+
+                </td>
             </tr>
         </table>
-
         <hr>
-
         <div>
-            Startlenke: <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.57289@1175525">
-            Sluttlenke: <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.04958@1175526">
-            <button id="beregn_lenke">Beregn rute med start- og slutt-lenkeposisjoner</button>
+            Startlenke: <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.46171863@1148712">
+            Sluttlenke: <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.73627156@1148885">
+            <button id="routeByLinks">Beregn rute med start- og slutt-lenkeposisjoner</button>
         </div>
         <hr>
         <div>
             Omkrets rundt punkter på meter: <input type="text" name="omkrets" placeholder="omkrets" value="100">
         </div>
         <div>
-            Start markør (x,y): <input type="text" name="startMarker" placeholder="x,y" size="35" value="226807.754, 6564543.275">
+            Start markør (x,y): <input type="text" name="startMarker" placeholder="x,y" size="35" value="226599.12226756767,6564564.394604767">
             <button id="setMarkers">Set markører</button>
             <button id="clearMarkers">Fjern start- og slutt-markør</button>
         </div>
         <div>
-            Slutt markør (x,y): <input type="text" name="endMarker" placeholder="x,y" size="35" value="226981.7045, 6564373.955">
-            <button id="beregn_marker">Beregn rute med markører</button>
+            Slutt markør (x,y): <input type="text" name="endMarker" placeholder="x,y" size="35" value="226696.13838754396,6564542.670789175">
+            <button id="routeByMarkers">Beregn rute med markører</button>
         </div>
         <hr>
         <div>
             Geometri:
-            <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(227170.659 6564015.405 1, 227168.5 6564015 1, 227161.794 6564014.66 1, 227155 6564015.7 1, 227148.9 6564018 1, 227146.785 6564019.288 1, 227143.706 6564021.734 1, 227141.501 6564023.698 1)</textarea>
-            <button id="beregn_geometri">Beregn rute med geometri</button>
+            <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(226778.2 6564468.6 5, 226747.1 6564470.1 5, 226717.5 6564466.4 5, 226705.9 6564462.7 6.2, 226687.2 6564462.9 6, 226657.7 6564460.7 6, 226628.5 6564459.5 6, 226611.3 6564459.6 6.2)</textarea>
+            <button id="routeByGeometry">Beregn rute med geometri</button>
         </div>
-
     </form>
 </main>
 

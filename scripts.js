@@ -1,4 +1,4 @@
-const bakgrunnsLag = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -10,110 +10,169 @@ const bakgrunnsLag = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
 
-// const baseurl = "http://localhost:12002";
+const MAP = L.map('map');
+const LAYERGROUP_ROUTE = L.layerGroup().addTo(MAP);
+const LAYERGROUP_MARKER = L.layerGroup().addTo(MAP);
 
-const map = L.map('mapid');
-const layerGroupRoute = L.layerGroup().addTo(map);
-const layerGroupMarker = L.layerGroup().addTo(map);
+const ROUTE_SERVICEPATH_JSON = "/beta/vegnett/rute";
 
-var startMarker = null;
-var endMarker = null;
+let startMarker = null;
+let endMarker = null;
 
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
-map.addLayer(bakgrunnsLag);
-map.setView([59.129641, 10.224452018737795], 15);
+MAP.addLayer(BACKGROUND_LAYER);
+MAP.setView([59.132, 10.22], 17);
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 
-function getData(url) {
-    console.log('Fetching ' + url);
-    fetch(url)
-        .then(function (response) {
-                return response.json()
-        }).then(function (result) {
-            result.flatMap(o => o.elementer)
-                .flatMap(g => g.geometri.wkt)
-                .map(wkt => Terraformer.WKT.parse(wkt))
-                .forEach(geojson => {
-                    geojson.crs = {
-                        'type': 'name',
-                        'properties': {
-                        'name': 'urn:ogc:def:crs:EPSG::25833'
-                        }
-                    };
-                    L.Proj.geoJson(geojson).addTo(layerGroupRoute);
-                });
-            if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
-        });
+function setURL(briefURL, requestUrlDiv) {
+    $(requestUrlDiv).empty();
+    $('<a>', {
+        text: briefURL,
+        href: briefURL,
+        target: "_blank"
+    }).appendTo($(requestUrlDiv));
 }
 
-map.on('click', onMapClick);
+function getData(urlParams) {
+    console.log('Fetching ' + urlParams);
+
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
+
+    // Get the detailed format
+    fetch(url)
+        .then(function (response) {
+            response.clone().json()
+
+                // Detailed segments drawn in map
+                .then(function (result) {
+                    result.flatMap(o => o.geometri.wkt)
+                        .map(wkt => Terraformer.WKT.parse(wkt))
+                        .forEach(geojson => {
+                            geojson.crs = {
+                                'type': 'name',
+                                'properties': {
+                                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                                }
+                            };
+                            L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
+                        });
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+                });
+
+            // Detailed segments as text
+            response.text()
+                .then(function (result) {
+                    setURL(url, "#requesturldetailed");
+                    $('#detailedFormatText').text(result);
+                });
+        });
+
+    // Brief segments as text
+    let briefURL = url + "&kortform=true";
+    fetch(briefURL)
+        .then(function (response) {
+            return response.text()
+                .then(function (result) {
+                    setURL(briefURL, "#requesturlbrief");
+                    $('#briefFormatText').text(result);
+                });
+        })
+}
+
+MAP.on('click', onMapClick);
+
+$("#detailedFormat").hide();
+
+$("#briefResponseFormat,#detailedResponseFormat").click(function(){
+    $("#detailedFormat").toggle();
+    $("#briefFormat").toggle();
+});
 
 $("#setMarkers").click(function (e) {
     event.preventDefault();
-    var start = $('input[name="startMarker"]').val();
-    var end = $('input[name="endMarker"]').val();
-    layerGroupMarker.clearLayers();
+    setMarkers();
+});
+
+function setMarkers() {
+    let start = $('input[name="startMarker"]').val();
+    let end = $('input[name="endMarker"]').val();
+    LAYERGROUP_MARKER.clearLayers();
     endMarker = null;
     startMarker = null;
     createEndMarker(convertUTM33ToWGS84LatLong(end));
     createStartMarker(convertUTM33ToWGS84LatLong(start));
-});
+}
 
-
-
-$("#beregn_marker").click(function (e) {
+$("#routeByMarkers").click(function (e) {
     event.preventDefault();
     clearRoute();
     if (startMarker && endMarker) {
-        var start = convertWGS84ToUTM33Coordinates(startMarker.getLatLng());
-        var end = convertWGS84ToUTM33Coordinates(endMarker.getLatLng());
-        var avstand = $('input[name="maksavstand"]').val();
-        var omkrets = $('input[name="omkrets"]').val();
-        var myurl = getBaseUrl() + "/beta/vegnett/rute"
-            + "?start=" + start[0] + "," + start[1]
+        let start = convertWGS84ToUTM33Coordinates(startMarker.getLatLng());
+        let end = convertWGS84ToUTM33Coordinates(endMarker.getLatLng());
+        let avstand = $('input[name="maksavstand"]').val();
+        let omkrets = $('input[name="omkrets"]').val();
+        let urlParams =
+            "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
-            + "&omkrets=" + omkrets;
+            + "&omkrets=" + omkrets
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks();
 
-        getData(myurl);
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
+        getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
 });
 
+function isRoadRef() {
+    return $('#roadsysref').val().trim().length > 0;
+}
 
-$("#beregn_geometri").click(function (e) {
+$("#resetroadref").click(function(e) {
+    event.preventDefault();
+    $("#roadsysref").val("");
+});
+
+$("#routeByGeometry").click(function (e) {
     event.preventDefault();
     clearRoute();
-    var geometri = $.trim($('#geometri').val());
-    var avstand = $('input[name="maksavstand"]').val();
+    let geometri = $.trim($('#geometri').val());
+    let avstand = $('input[name="maksavstand"]').val();
 
     if (geometri && avstand) {
-        var myurl = getBaseUrl() + "/beta/vegnett/rute"
-            + "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
+        let urlParams =
+            "?geometri=" + geometri
+            + "&maks_avstand=" + avstand;
 
-        getData(myurl);
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
+
+        getData(urlParams);
     } else {
         alert("Geometri må ha verdi!");
     }
 });
 
-$("#beregn_lenke").click(function (e) {
+$("#routeByLinks").click(function (e) {
     event.preventDefault();
     clearRoute();
-    var start = $('input[name="startlenke"]').val();
-    var slutt = $('input[name="sluttlenke"]').val();
-    var avstand = $('input[name="maksavstand"]').val();
+    let start = $('input[name="startlenke"]').val();
+    let slutt = $('input[name="sluttlenke"]').val();
+    let avstand = $('input[name="maksavstand"]').val();
 
     if (start && slutt) {
-        var myurl = getBaseUrl() + "/beta/vegnett/rute"
-            + "?start=" + start
+        let urlParams =
+            "?start=" + start
             + "&slutt=" + slutt
             + "&maks_avstand=" + avstand;
 
-        getData(myurl);
+        getData(urlParams);
     } else {
         alert("Du må ha fylt ut startlenke og sluttlenke!");
     }
@@ -121,48 +180,85 @@ $("#beregn_lenke").click(function (e) {
 
 $('#clearRoutes').click(function (e) {
     event.preventDefault();
-    layerGroupRoute.clearLayers();
+    LAYERGROUP_ROUTE.clearLayers();
+});
+
+$('#showMarkerPos').click(function() {
+    setMarkers();
+});
+
+$("#POS_UTM33,#POS_WGS84").change(function() {
+    setMarkers();
 });
 
 $('#clearMarkers').click(function (e) {
     event.preventDefault();
-    layerGroupMarker.clearLayers();
+    LAYERGROUP_MARKER.clearLayers();
     endMarker = null;
     startMarker = null;
 });
 
 function clearRoute() {
     if ($('#clearRoute').is(":checked")) {
-        layerGroupRoute.clearLayers();
+        LAYERGROUP_ROUTE.clearLayers();
     }
 }
 
-function getBaseUrl() {
+function showPos(){
+    return $('#showMarkerPos').is(':checked');
+}
+
+function showLatLongWGS84() {
+    return $('#POS_WGS84').is(':checked');
+}
+
+function showLatLongUTM33() {
+    return $('#POS_UTM33').is(':checked');
+}
+function isConnectionLinks() {
+    return $('#connectionLinks').is(':checked');
+}
+
+function isDetailedLinks() {
+    return $('#detailedLinks').is(':checked');
+}
+
+function tooltipLatLng(latlong) {
+    if (showPos()) {
+        if (showLatLongWGS84()) return " (" + latlong.lat + ", " + latlong.lng + ")";
+        if (showLatLongUTM33()) return " (" + convertWGS84ToUTM33Coordinates(latlong) + ")";
+    }
+    return "";
+}
+
+function getServerUrl() {
     return $('#server').val();
 }
 
 function createStartMarker(e) {
     startMarker = L.marker(e.latlng,{draggable:true})
-        .bindTooltip("Start",{permanent: true, direction: 'right'})
-        .addTo(layerGroupMarker);
+        .bindTooltip("Start" + tooltipLatLng(e.latlng), {permanent: true, direction: 'right'})
+        .addTo(LAYERGROUP_MARKER);
 
     $('input[name="startMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
     startMarker.on("drag", function (e) {
-        var marker = e.target;
+        let marker = e.target;
+        marker.bindTooltip("Start" + tooltipLatLng(marker.getLatLng()));
         $('input[name="startMarker"]').val(convertWGS84ToUTM33Coordinates(marker.getLatLng()));
     });
 }
 
 function createEndMarker(e) {
     endMarker = L.marker(e.latlng,{draggable:true})
-        .bindTooltip("Slutt",{permanent: true, direction: 'right'})
-        .addTo(layerGroupMarker);
+        .bindTooltip("Slutt" + tooltipLatLng(e.latlng),{permanent: true, direction: 'right'})
+        .addTo(LAYERGROUP_MARKER);
 
     $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
     endMarker.on("drag", function (e) {
-        var marker = e.target;
+        let marker = e.target;
+        marker.bindTooltip("Slutt" + tooltipLatLng(marker.getLatLng()));
         $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(marker.getLatLng()));
     });
 }
@@ -182,8 +278,8 @@ function convertWGS84ToUTM33Coordinates(latlong) {
 }
 
 function convertUTM33ToWGS84LatLong(utm) {
-    var xy = utm.split(",");
-    var transformed = proj4(UTM33, WGS84, [(parseFloat(xy[0])),(parseFloat(xy[1]))]);
-    return  { "latlng" :
-            {"lng" : transformed[0], "lat" : transformed[1]}};
+    let xy = utm.split(",");
+    let transformed = proj4(UTM33, WGS84, [(parseFloat(xy[0])),(parseFloat(xy[1]))]);
+    return  {"latlng" :
+            {"lat" : transformed[1], "lng" : transformed[0]}};
 }
