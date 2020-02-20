@@ -11,16 +11,32 @@
           crossorigin=""/>
 
     <style>
-        #mapid {height: 600px; width: 70%; float: left; }
-        #infoid {height: 600px; width: 30%; overflow:scroll; float: right; }
+        #map {height: 600px; width: 70%; float: left; }
+        #response {height: 600px; width: 30%; float: right; }
+        #responsetext {height: 550px; overflow: scroll; }
     </style>
 </head>
 
 <body>
 <main>
     <div>
-        <div id="mapid"></div>
-        <div id="infoid"><pre id="shortform"></pre></div>
+        <div id="map"></div>
+        <div id="response">
+            Vis response i
+            <input type="radio" name="respformat" id="briefResponseFormat" checked="true">Kort format
+            <input type="radio" name="respformat" id="detailedResponseFormat">Detaljert format
+            <hr>
+            <div id="responsetext">
+                <div id="briefFormat">
+                    <div id="requesturlbrief"></div>
+                    <pre id="briefFormatText"></pre>
+                </div>
+                <div id="detailedFormat">
+                    <div id="requesturldetailed"></div>
+                    <pre id="detailedFormatText"></pre>
+                </div>
+            </div>
+        </div>
     </div>
     <form action="#">
         <table>
@@ -30,11 +46,24 @@
                     <select id="server">
                     </select>
                 </td>
-                <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="maksavstand" value="10"></td>
-                <td><input type="checkbox" id="clearRoute" checked="true" value="clear">Slett beregnede ruter</td>
-                <td><input type="checkbox" id="showMarkerLatLng"  value="showLatLng">Vis Latitude og longitude for markør</td>
+                <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="avstand" value="10"></td>
+                <td><input type="checkbox" id="clearRoute" checked="true">Slett beregnede ruter</td>
+                <td>
+                    <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
+                    <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
+                    <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
+                </td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
+                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
+<!--                <td>-->
+<!--                    Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse" size="30">-->
+<!--                    <button type="button" id="resetroadref">X</button>-->
+<!--                </td>-->
+                <td>
 
-
+                </td>
             </tr>
         </table>
         <hr>

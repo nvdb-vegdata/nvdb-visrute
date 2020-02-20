@@ -10,7 +10,7 @@ const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
 
-const MAP = L.map('mapid');
+const MAP = L.map('map');
 const LAYERGROUP_ROUTE = L.layerGroup().addTo(MAP);
 const LAYERGROUP_MARKER = L.layerGroup().addTo(MAP);
 
@@ -25,40 +25,69 @@ MAP.setView([59.132, 10.22], 17);
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 
+function setURL(briefURL, requestUrlDiv) {
+    $(requestUrlDiv).empty();
+    $('<a>', {
+        text: briefURL,
+        href: briefURL,
+        target: "_blank"
+    }).appendTo($(requestUrlDiv));
+}
+
 function getData(urlParams) {
     console.log('Fetching ' + urlParams);
 
-    let shortFormURL = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&kortform=true" + "&pretty=true";
-    // Show the short format in info
-    fetch(shortFormURL)
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
+
+    // Get the detailed format
+    fetch(url)
+        .then(function (response) {
+            response.clone().json()
+
+                // Detailed segments drawn in map
+                .then(function (result) {
+                    result.flatMap(o => o.geometri.wkt)
+                        .map(wkt => Terraformer.WKT.parse(wkt))
+                        .forEach(geojson => {
+                            geojson.crs = {
+                                'type': 'name',
+                                'properties': {
+                                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                                }
+                            };
+                            L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
+                        });
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+                });
+
+            // Detailed segments as text
+            response.text()
+                .then(function (result) {
+                    setURL(url, "#requesturldetailed");
+                    $('#detailedFormatText').text(result);
+                });
+        });
+
+    // Brief segments as text
+    let briefURL = url + "&kortform=true";
+    fetch(briefURL)
         .then(function (response) {
             return response.text()
-        }).then(function (result) {
-        $('#shortform').text(result);
-    });
-
-    let longFormUrl = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
-    // Display the long format in the map
-    fetch(longFormUrl)
-        .then(function (response) {
-            return response.json()
-        }).then(function (result) {
-        result.flatMap(o => o.geometri.wkt)
-            .map(wkt => Terraformer.WKT.parse(wkt))
-            .forEach(geojson => {
-                geojson.crs = {
-                    'type': 'name',
-                    'properties': {
-                        'name': 'urn:ogc:def:crs:EPSG::25833'
-                    }
-                };
-                L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
-            });
-        if (result.length == 0) alert ("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
-    });
+                .then(function (result) {
+                    setURL(briefURL, "#requesturlbrief");
+                    $('#briefFormatText').text(result);
+                });
+        })
 }
 
 MAP.on('click', onMapClick);
+
+$("#detailedFormat").hide();
+
+$("#briefResponseFormat,#detailedResponseFormat").click(function(){
+    $("#detailedFormat").toggle();
+    $("#briefFormat").toggle();
+});
 
 $("#setMarkers").click(function (e) {
     event.preventDefault();
@@ -87,12 +116,26 @@ $("#routeByMarkers").click(function (e) {
             "?start=" + start[0] + "," + start[1]
             + "&slutt=" + end[0] + "," + end[1]
             + "&maks_avstand=" + avstand
-            + "&omkrets=" + omkrets;
+            + "&omkrets=" + omkrets
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks();
 
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
         getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
+});
+
+function isRoadRef() {
+    return $('#roadsysref').val().trim().length > 0;
+}
+
+$("#resetroadref").click(function(e) {
+    event.preventDefault();
+    $("#roadsysref").val("");
 });
 
 $("#routeByGeometry").click(function (e) {
@@ -104,7 +147,11 @@ $("#routeByGeometry").click(function (e) {
     if (geometri && avstand) {
         let urlParams =
             "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
+            + "&maks_avstand=" + avstand;
+
+        // if (isRoadRef()) {
+        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        // }
 
         getData(urlParams);
     } else {
@@ -136,7 +183,11 @@ $('#clearRoutes').click(function (e) {
     LAYERGROUP_ROUTE.clearLayers();
 });
 
-$('#showMarkerLatLng').click(function() {
+$('#showMarkerPos').click(function() {
+    setMarkers();
+});
+
+$("#POS_UTM33,#POS_WGS84").change(function() {
     setMarkers();
 });
 
@@ -153,12 +204,31 @@ function clearRoute() {
     }
 }
 
-function showLatLong() {
-    return ($('#showMarkerLatLng').is(":checked"));
+function showPos(){
+    return $('#showMarkerPos').is(':checked');
+}
+
+function showLatLongWGS84() {
+    return $('#POS_WGS84').is(':checked');
+}
+
+function showLatLongUTM33() {
+    return $('#POS_UTM33').is(':checked');
+}
+function isConnectionLinks() {
+    return $('#connectionLinks').is(':checked');
+}
+
+function isDetailedLinks() {
+    return $('#detailedLinks').is(':checked');
 }
 
 function tooltipLatLng(latlong) {
-    return showLatLong() ? " (LatLng(" + latlong.lat + ", " + latlong.lng + ")" : "";
+    if (showPos()) {
+        if (showLatLongWGS84()) return " (" + latlong.lat + ", " + latlong.lng + ")";
+        if (showLatLongUTM33()) return " (" + convertWGS84ToUTM33Coordinates(latlong) + ")";
+    }
+    return "";
 }
 
 function getServerUrl() {
