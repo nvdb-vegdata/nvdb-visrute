@@ -48,21 +48,47 @@
                 </td>
                 <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="avstand" value="10"></td>
                 <td><input type="checkbox" id="clearRoute" checked="true">Slett beregnede ruter</td>
+
+            </tr>
+            <tr>
+                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
+                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
                 <td>
                     <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
                     <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
                     <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
                 </td>
             </tr>
-            <tr>
-                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
-                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
-<!--                <td>-->
-<!--                    Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse" size="30">-->
-<!--                    <button type="button" id="resetroadref">X</button>-->
-<!--                </td>-->
-                <td>
+        </table>
 
+        <table>
+            <tr>
+                <td>Typeveg:
+                    <select id="typeOfRoad">
+                        <option value="">-- Ingen valgt --</option>
+                        <option>kanalisertVeg</option>
+                        <option>enkelBilveg</option>
+                        <option>rampe</option>
+                        <option>rundkjøring</option>
+                        <option>bilferje</option>
+                        <option>passasjerferje</option>
+                        <option>gangOgSykkelveg</option>
+                        <option>sykkelveg</option>
+                        <option>gangveg</option>
+                        <option>gågate</option>
+                    </select>
+                    <input id="multipletype" type="button" value="Velg flere">
+                </td>
+                <td>&nbsp; Trafikantgruppe:
+                    <select id="roaduserGroup">
+                        <option value="">-- Ingen valgt --</option>
+                        <option value="K">Kjørende</option>
+                        <option value="G">Gående</option>
+                    </select>
+                </td>
+                <td>
+                    &nbsp; Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse,vegsystemreferanse..." size="50">
+                    <button type="button" id="resetroadref">X</button>
                 </td>
             </tr>
         </table>

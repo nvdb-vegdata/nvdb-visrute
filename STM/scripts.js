@@ -37,6 +37,18 @@ function setURL(briefURL, requestUrlDiv) {
 function getData(urlParams) {
     console.log('Fetching ' + urlParams);
 
+    if (hasValue('#roadsysref')) {
+        urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+    }
+
+    if (hasValue('#roaduserGroup')) {
+        urlParams += "&trafikantgruppe=" + $('#roaduserGroup').val();
+    }
+
+    if (hasValues('#typeOfRoad')) {
+        urlParams += "&typeveg=" + $('#typeOfRoad').val();
+    }
+
     let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
 
     // Get the detailed format
@@ -120,18 +132,28 @@ $("#routeByMarkers").click(function (e) {
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks();
 
-        // if (isRoadRef()) {
-        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
-        // }
         getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
 });
 
-function isRoadRef() {
-    return $('#roadsysref').val().trim().length > 0;
+function hasValue(id) {
+    return $(id).val().trim().length > 0;
 }
+
+function hasValues(id) {
+    return $(id).val().length > 0;
+}
+
+$("#multipletype").click(function(e) {
+    let multiple = $("#typeOfRoad").attr("multiple");
+    if (multiple == null) {
+        $("#typeOfRoad").attr("multiple", "true");
+    } else {
+        $("#typeOfRoad").removeAttr("multiple");
+    }
+});
 
 $("#resetroadref").click(function(e) {
     event.preventDefault();
@@ -148,10 +170,6 @@ $("#routeByGeometry").click(function (e) {
         let urlParams =
             "?geometri=" + geometri
             + "&maks_avstand=" + avstand;
-
-        // if (isRoadRef()) {
-        //     urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
-        // }
 
         getData(urlParams);
     } else {
