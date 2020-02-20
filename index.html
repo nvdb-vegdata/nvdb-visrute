@@ -11,106 +11,65 @@
           crossorigin=""/>
 
     <style>
-        #map {height: 600px; width: 70%; float: left; }
-        #response {height: 600px; width: 30%; float: right; }
-        #responsetext {height: 550px; overflow: scroll; }
+        table.mytable {
+            width: 80%;
+        }
+        table.mytable td, th {
+            padding: 5px 12px 5px 30px;
+            text-align: left
+        }
+
+        table.mytable th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        table.mytable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
     </style>
 </head>
 
 <body>
 <main>
     <div>
-        <div id="map"></div>
-        <div id="response">
-            Vis response i
-            <input type="radio" name="respformat" id="briefResponseFormat" checked="true">Kort format
-            <input type="radio" name="respformat" id="detailedResponseFormat">Detaljert format
-            <hr>
-            <div id="responsetext">
-                <div id="briefFormat">
-                    <div id="requesturlbrief"></div>
-                    <pre id="briefFormatText"></pre>
-                </div>
-                <div id="detailedFormat">
-                    <div id="requesturldetailed"></div>
-                    <pre id="detailedFormatText"></pre>
-                </div>
-            </div>
-        </div>
-    </div>
-    <form action="#">
-        <table>
+
+        <h2> NVDB Visrute</h2>
+        <p>
+            Vi har lagt til nye urler for NVDB Visrute, slik at du kan velge hvilket miljø du vil teste mot.
+        </p>
+        <p>
+            Det pleier å ta litt tid før siste versjon blir lagt ut på akseptansetest- og produksjons-miljø.
+            Til systemtest miljø og K2 legger vi ut selv, og der kan det komme nye versjoner raskere.
+        </p>
+        <table class="mytable">
             <tr>
-                <td>
-                    Server:
-                    <select id="server">
-                        <option value="https://apilesv3.atlas.vegvesen.no">https://apilesv3.atlas.vegvesen.no (PROD)</option>
-                        <option value="https://www.vegvesen.no/nvdb/api/v3">https://www.vegvesen.no/nvdb/api/v3 (PROD)</option>
-                        <option value="https://apilesv3.test.atlas.vegvesen.no">https://apilesv3.test.atlas.vegvesen.no (ATM)</option>
-                        <option value="https://www.test.vegvesen.no/nvdb/api/v3">https://www.test.vegvesen.no/nvdb/api/v3 (ATM)</option>
-                        <option value="https://apilesv3.utv.atlas.vegvesen.no">https://apilesv3.utv.atlas.vegvesen.no (STM)</option>
-                        <option value="https://www.utv.vegvesen.no/nvdb/api/v3">https://www.utv.vegvesen.no/nvdb/api/v3 (STM)</option>
-                        <option value="https://pm1.utv.vegvesen.no/nvdb/api/v3">https://pm1.utv.vegvesen.no/nvdb/api/v3 (ITM)</option>
-                        <option value="https://nvdbw01.kantega.no/nvdb/api/v3">https://nvdbw01.kantega.no/nvdb/api/v3 (K2 - Kantega)</option>
-                        <option value="http://localhost:12002">http://localhost:12002 (localhost for developers)</option>
-                    </select>
-                </td>
-                <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="avstand" value="10"></td>
-                <td><input type="checkbox" id="clearRoute" checked="true">Slett beregnede ruter</td>
-                <td>
-                    <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
-                    <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
-                    <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
+                <th>Fase</th>
+                <th>Beskrivelse</th>
+                <th>URL</th>
+            </tr>
+            <tr>
+                <td>PROD</td>
+                <td>Produksjons miljø</td>
+                <td><a href="https://nvdb-vegdata.github.io/nvdb-visrute/PROD">https://nvdb-vegdata.github.io/nvdb-visrute/PROD</a>
                 </td>
             </tr>
             <tr>
-                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
-                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
-<!--                <td>-->
-<!--                    Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse" size="30">-->
-<!--                    <button type="button" id="resetroadref">X</button>-->
-<!--                </td>-->
-                <td>
-
+                <td>ATM</td>
+                <td>Akseptansetest miljø</td>
+                <td><a href="https://nvdb-vegdata.github.io/nvdb-visrute/ATM">https://nvdb-vegdata.github.io/nvdb-visrute/ATM</a>
+                </td>
+            </tr>
+            <tr>
+                <td>STM</td>
+                <td>Systemtest miljø og Kantegas server K2</td>
+                <td><a href="https://nvdb-vegdata.github.io/nvdb-visrute/STM">https://nvdb-vegdata.github.io/nvdb-visrute/STM</a>
                 </td>
             </tr>
         </table>
-        <hr>
-        <div>
-            Startlenke: <input type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.46171863@1148712">
-            Sluttlenke: <input type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.73627156@1148885">
-            <button id="routeByLinks">Beregn rute med start- og slutt-lenkeposisjoner</button>
-        </div>
-        <hr>
-        <div>
-            Omkrets rundt punkter på meter: <input type="text" name="omkrets" placeholder="omkrets" value="100">
-        </div>
-        <div>
-            Start markør (x,y): <input type="text" name="startMarker" placeholder="x,y" size="35" value="226599.12226756767,6564564.394604767">
-            <button id="setMarkers">Set markører</button>
-            <button id="clearMarkers">Fjern start- og slutt-markør</button>
-        </div>
-        <div>
-            Slutt markør (x,y): <input type="text" name="endMarker" placeholder="x,y" size="35" value="226696.13838754396,6564542.670789175">
-            <button id="routeByMarkers">Beregn rute med markører</button>
-        </div>
-        <hr>
-        <div>
-            Geometri:
-            <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(226778.2 6564468.6 5, 226747.1 6564470.1 5, 226717.5 6564466.4 5, 226705.9 6564462.7 6.2, 226687.2 6564462.9 6, 226657.7 6564460.7 6, 226628.5 6564459.5 6, 226611.3 6564459.6 6.2)</textarea>
-            <button id="routeByGeometry">Beregn rute med geometri</button>
-        </div>
-    </form>
+    </div>
 </main>
 
-<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
-        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
-        crossorigin=""></script>
-<script src="https://unpkg.com/jquery@3.4.1/dist/jquery.js"></script>
-<script src="https://unpkg.com/terraformer@1.0.7/terraformer.js"></script>
-<script src="https://unpkg.com/terraformer-wkt-parser@1.1.2/terraformer-wkt-parser.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
-<script src="scripts.js"></script>
 </body>
 </html>
