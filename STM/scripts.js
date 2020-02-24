@@ -149,9 +149,13 @@ function hasValues(id) {
 $("#multipletype").click(function(e) {
     let multiple = $("#typeOfRoad").attr("multiple");
     if (multiple == null) {
-        $("#typeOfRoad").attr("multiple", "true");
+        $("#typeOfRoad")
+            .attr("multiple", "true")
+            .attr("size", "6");
     } else {
-        $("#typeOfRoad").removeAttr("multiple");
+        $("#typeOfRoad")
+            .removeAttr("size")
+            .removeAttr("multiple")
     }
 });
 
