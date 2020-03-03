@@ -1,5 +1,5 @@
 let serverURLs = [
-    {url: "https://apilesv3.test.atlas.vegvesen.no",  label: "https://apilesv3.test.atlas.vegvesen.no (ATM)"},
+    {url: "https://nvdbapiles-v3.test.atlas.vegvesen.no",  label: "https://nvdbapiles-v3.test.atlas.vegvesen.no (ATM)"},
     {url: "https://www.test.vegvesen.no/nvdb/api/v3", label: "https://www.test.vegvesen.no/nvdb/api/v3 (ATM)"}
 ];
 
