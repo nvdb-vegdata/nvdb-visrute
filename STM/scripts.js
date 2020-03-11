@@ -12,12 +12,14 @@ const UTM33 = "EPSG:25833";
 
 const MAP = L.map('map');
 const LAYERGROUP_ROUTE = L.layerGroup().addTo(MAP);
+const LAYERGROUP_GEOMETRY = L.layerGroup().addTo(MAP);
 const LAYERGROUP_MARKER = L.layerGroup().addTo(MAP);
 
 const ROUTE_SERVICEPATH_JSON = "/beta/vegnett/rute";
 
 let startMarker = null;
 let endMarker = null;
+let geometryDrawn = false;
 
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
 MAP.addLayer(BACKGROUND_LAYER);
@@ -115,6 +117,28 @@ function setMarkers() {
     createEndMarker(convertUTM33ToWGS84LatLong(end));
     createStartMarker(convertUTM33ToWGS84LatLong(start));
 }
+
+$("#drawGeometry").click(function(e) {
+    event.preventDefault();
+    LAYERGROUP_GEOMETRY.clearLayers();
+
+    geometryDrawn = !geometryDrawn;
+
+    if (geometryDrawn) {
+        let geojson = Terraformer.WKT.parse($('#geometri').val());
+        geojson.crs = {
+            'type': 'name',
+            'properties': {
+                'name': 'urn:ogc:def:crs:EPSG::25833'
+            }
+        };
+        L.Proj.geoJson(geojson).addTo(LAYERGROUP_GEOMETRY);
+    }
+
+    LAYERGROUP_GEOMETRY.eachLayer(function(layer) {
+        layer.setStyle({color :'yellow'})
+    });
+});
 
 $("#routeByMarkers").click(function (e) {
     event.preventDefault();
