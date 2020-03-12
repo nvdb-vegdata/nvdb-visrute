@@ -10,20 +10,130 @@ const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
 
-const MAP = L.map('map');
-const LAYERGROUP_ROUTE = L.layerGroup().addTo(MAP);
-const LAYERGROUP_MARKER = L.layerGroup().addTo(MAP);
+let map = L.map('map');
+const LAYERGROUP_ROUTE = L.layerGroup().addTo(map);
+const LAYERGROUP_GEOMETRY = L.layerGroup().addTo(map);
+const LAYERGROUP_MARKER = L.layerGroup().addTo(map);
 
 const ROUTE_SERVICEPATH_JSON = "/beta/vegnett/rute";
 
 let startMarker = null;
 let endMarker = null;
+let geometryDrawn = false;
 
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
-MAP.addLayer(BACKGROUND_LAYER);
-MAP.setView([59.132, 10.22], 17);
+map.addLayer(BACKGROUND_LAYER);
+map.setView([59.132, 10.22], 17);
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
+
+let drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+let options = {
+    draw : {
+        rectangle: false,
+        circle: false,
+        marker: true,
+        circlemarker: false
+    },
+    shapeOptions: {
+        showArea: true,
+        clickable: true
+    },
+    metric: true,
+    edit: {
+        featureGroup: drawnItems
+    }
+};
+
+let drawControl = new L.Control.Draw(options);
+map.addControl(drawControl);
+
+map.on('draw:created', function(e) {
+    drawnItems.addLayer(e.layer);
+    setGeometry(e.layer, e.layerType);
+});
+
+map.on('draw:editstart', function() {
+    console.log('edit start');
+});
+
+
+map.on('draw:edited', function(e) {
+    var layers = e.layers;
+    layers.eachLayer(function (layer) {
+        if ((layer instanceof L.Polyline) && ! (layer instanceof L.Polygon)) {
+            setGeometry(layer, "polyline");
+        }
+
+        if ((layer instanceof L.Polygon) && ! (layer instanceof L.Rectangle)) {
+            setGeometry(layer, "polygon");
+        }
+
+        if ((layer instanceof L.Marker)) {
+            setGeometry(layer, "marker");
+        }
+    });
+});
+
+
+function setGeometry(layer, layerType) {
+
+    let result = "";
+    let iterator;
+
+    switch (layerType) {
+        case "marker":
+            result = "POINT (";
+            break;
+
+        case "polygon":
+            result = "POLYGON ((";
+            iterator = layer.getLatLngs()[0];
+            break;
+
+        default:
+        case "polyline":
+            result = "LINESTRING (";
+            iterator = layer.getLatLngs();
+            break;
+    }
+
+    let next = false;
+    try {
+        if (layerType == "marker") {
+            let utm33Coordinate = convertWGS84ToUTM33Coordinates(layer.getLatLng());
+            result += utm33Coordinate[0] + " " + utm33Coordinate[1];
+        } else {
+            iterator.forEach(latlng => {
+                if (next) result += ", ";
+                let utm33Coordinate = convertWGS84ToUTM33Coordinates(latlng);
+                result += utm33Coordinate[0] + " " + utm33Coordinate[1];
+                next = true;
+            });
+        }
+
+        switch (layerType) {
+            case "marker":
+            case "polyline" :
+            default:
+                result += ")";
+                break;
+
+            case "polygon":
+                let utm33Coordinate = convertWGS84ToUTM33Coordinates(layer.getLatLngs()[0][0]);
+                result += ", "
+                    +utm33Coordinate[0] + " " + utm33Coordinate[1]
+                    + " ))";
+                break;
+        }
+
+        $("#geometri").val(result);
+    } catch (e) {
+        alert(e);
+    }
+}
 
 function setURL(briefURL, requestUrlDiv) {
     $(requestUrlDiv).empty();
@@ -92,7 +202,7 @@ function getData(urlParams) {
         })
 }
 
-MAP.on('click', onMapClick);
+// map.on('click', onMapClick);
 
 $("#detailedFormat").hide();
 
@@ -115,6 +225,28 @@ function setMarkers() {
     createEndMarker(convertUTM33ToWGS84LatLong(end));
     createStartMarker(convertUTM33ToWGS84LatLong(start));
 }
+
+$("#drawGeometry").click(function(e) {
+    event.preventDefault();
+    LAYERGROUP_GEOMETRY.clearLayers();
+
+    geometryDrawn = !geometryDrawn;
+
+    if (geometryDrawn) {
+        let geojson = Terraformer.WKT.parse($('#geometri').val());
+        geojson.crs = {
+            'type': 'name',
+            'properties': {
+                'name': 'urn:ogc:def:crs:EPSG::25833'
+            }
+        };
+        L.Proj.geoJson(geojson).addTo(LAYERGROUP_GEOMETRY);
+    }
+
+    LAYERGROUP_GEOMETRY.eachLayer(function(layer) {
+        layer.setStyle({color :'yellow'})
+    });
+});
 
 $("#routeByMarkers").click(function (e) {
     event.preventDefault();
