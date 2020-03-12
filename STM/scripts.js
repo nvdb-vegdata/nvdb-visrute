@@ -202,7 +202,7 @@ function getData(urlParams) {
         })
 }
 
-// map.on('click', onMapClick);
+map.on('click', onMapClick);
 
 $("#detailedFormat").hide();
 
