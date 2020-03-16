@@ -59,7 +59,6 @@ map.on('draw:editstart', function() {
     console.log('edit start');
 });
 
-
 map.on('draw:edited', function(e) {
     var layers = e.layers;
     layers.eachLayer(function (layer) {
