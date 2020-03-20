@@ -225,6 +225,24 @@ function setMarkers() {
     createStartMarker(convertUTM33ToWGS84LatLong(start));
 }
 
+$("#zoomToGeometry").click(function(e) {
+    event.preventDefault();
+
+    let geometry = getUrlDecodedGeometry();
+
+    // Find points in geometry
+    matches = geometry.match(/(\d+.\d+)/g);
+
+    // Take first point of geometry
+    let x = matches[0];
+    let y = matches[1];
+
+    let point = convertUTM33ToWGS84LatLong( x + ", " + y);
+
+    // Set view to zoom to geometry
+    map.setView([point.latlng.lat, point.latlng.lng], 17);
+});
+
 $("#drawGeometry").click(function(e) {
     event.preventDefault();
     LAYERGROUP_GEOMETRY.clearLayers();
@@ -232,7 +250,7 @@ $("#drawGeometry").click(function(e) {
     geometryDrawn = !geometryDrawn;
 
     if (geometryDrawn) {
-        let geojson = Terraformer.WKT.parse($('#geometri').val());
+        let geojson = Terraformer.WKT.parse(getUrlDecodedGeometry());
         geojson.crs = {
             'type': 'name',
             'properties': {
@@ -268,6 +286,12 @@ $("#routeByMarkers").click(function (e) {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
 });
+
+function getUrlDecodedGeometry() {
+    let geometry = decodeURI($('#geometri').val());
+    $('#geometri').val(geometry);
+    return geometry;
+}
 
 function hasValue(id) {
     return $(id).val().trim().length > 0;
