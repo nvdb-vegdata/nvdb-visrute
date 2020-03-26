@@ -1,5 +1,6 @@
 const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-    maxZoom: 18,
+    maxZoom: 22,
+    maxNativeZoom: 19,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
         '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -9,17 +10,16 @@ const BACKGROUND_LAYER = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{
 
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 const UTM33 = "EPSG:25833";
-
-let map = L.map('map');
-const LAYERGROUP_ROUTE = L.layerGroup().addTo(map);
-const LAYERGROUP_GEOMETRY = L.layerGroup().addTo(map);
-const LAYERGROUP_MARKER = L.layerGroup().addTo(map);
-
 const ROUTE_SERVICEPATH_JSON = "/beta/vegnett/rute";
 
 let startMarker = null;
 let endMarker = null;
 let geometryDrawn = false;
+
+let map = L.map('map');
+let layerGroupRoute = L.layerGroup().addTo(map);
+let layerGroupGeometry = L.layerGroup().addTo(map);
+let layerGroupMarker = L.layerGroup().addTo(map);
 
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
 map.addLayer(BACKGROUND_LAYER);
@@ -176,7 +176,7 @@ function getData(urlParams) {
                                     'name': 'urn:ogc:def:crs:EPSG::25833'
                                 }
                             };
-                            L.Proj.geoJson(geojson).addTo(LAYERGROUP_ROUTE);
+                            L.Proj.geoJson(geojson).addTo(layerGroupRoute);
                         });
                     if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
                 });
@@ -218,7 +218,7 @@ $("#setMarkers").click(function (e) {
 function setMarkers() {
     let start = $('input[name="startMarker"]').val();
     let end = $('input[name="endMarker"]').val();
-    LAYERGROUP_MARKER.clearLayers();
+    layerGroupMarker.clearLayers();
     endMarker = null;
     startMarker = null;
     createEndMarker(convertUTM33ToWGS84LatLong(end));
@@ -245,7 +245,7 @@ $("#zoomToGeometry").click(function(e) {
 
 $("#drawGeometry").click(function(e) {
     event.preventDefault();
-    LAYERGROUP_GEOMETRY.clearLayers();
+    layerGroupGeometry.clearLayers();
 
     geometryDrawn = !geometryDrawn;
 
@@ -257,10 +257,10 @@ $("#drawGeometry").click(function(e) {
                 'name': 'urn:ogc:def:crs:EPSG::25833'
             }
         };
-        L.Proj.geoJson(geojson).addTo(LAYERGROUP_GEOMETRY);
+        L.Proj.geoJson(geojson).addTo(layerGroupGeometry);
     }
 
-    LAYERGROUP_GEOMETRY.eachLayer(function(layer) {
+    layerGroupGeometry.eachLayer(function(layer) {
         layer.setStyle({color :'yellow'})
     });
 });
@@ -357,7 +357,7 @@ $("#routeByLinks").click(function (e) {
 
 $('#clearRoutes').click(function (e) {
     event.preventDefault();
-    LAYERGROUP_ROUTE.clearLayers();
+    layerGroupRoute.clearLayers();
 });
 
 $('#showMarkerPos').click(function() {
@@ -370,14 +370,14 @@ $("#POS_UTM33,#POS_WGS84").change(function() {
 
 $('#clearMarkers').click(function (e) {
     event.preventDefault();
-    LAYERGROUP_MARKER.clearLayers();
+    layerGroupMarker.clearLayers();
     endMarker = null;
     startMarker = null;
 });
 
 function clearRoute() {
     if ($('#clearRoute').is(":checked")) {
-        LAYERGROUP_ROUTE.clearLayers();
+        layerGroupRoute.clearLayers();
     }
 }
 
@@ -415,7 +415,7 @@ function getServerUrl() {
 function createStartMarker(e) {
     startMarker = L.marker(e.latlng,{draggable:true})
         .bindTooltip("Start" + tooltipLatLng(e.latlng), {permanent: true, direction: 'right'})
-        .addTo(LAYERGROUP_MARKER);
+        .addTo(layerGroupMarker);
 
     $('input[name="startMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
@@ -429,7 +429,7 @@ function createStartMarker(e) {
 function createEndMarker(e) {
     endMarker = L.marker(e.latlng,{draggable:true})
         .bindTooltip("Slutt" + tooltipLatLng(e.latlng),{permanent: true, direction: 'right'})
-        .addTo(LAYERGROUP_MARKER);
+        .addTo(layerGroupMarker);
 
     $('input[name="endMarker"]').val(convertWGS84ToUTM33Coordinates(e.latlng));
 
