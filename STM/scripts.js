@@ -328,7 +328,10 @@ $("#routeByGeometry").click(function (e) {
     if (geometri && avstand) {
         let urlParams =
             "?geometri=" + geometri
-            + "&maks_avstand=" + avstand;
+            + "&maks_avstand=" + avstand
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks();
+
 
         getData(urlParams);
     } else {
