@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
           crossorigin=""/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+
     <style>
-        #map {height: 500px; width: 70%; float: left; }
-        #response {height: 500px; width: 30%; float: right; }
-        #responsetext {height: 450px; overflow: scroll; }
+        #map {height: 600px; width: 70%; float: left; }
+        #response {height: 600px; width: 30%; float: right; }
+        #responsetext {height: 550px; overflow: scroll; }
     </style>
 </head>
 
@@ -48,47 +48,21 @@
                 </td>
                 <td>Maks_avstand til lenke i meter: <input type="text" name="maksavstand" placeholder="avstand" value="10"></td>
                 <td><input type="checkbox" id="clearRoute" checked="true">Slett beregnede ruter</td>
-
-            </tr>
-            <tr>
-                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
-                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
                 <td>
                     <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
                     <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
                     <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
                 </td>
             </tr>
-        </table>
-
-        <table>
             <tr>
-                <td>Typeveg:
-                    <select id="typeOfRoad">
-                        <option value="">-- Ingen valgt --</option>
-                        <option>kanalisertVeg</option>
-                        <option>enkelBilveg</option>
-                        <option>rampe</option>
-                        <option>rundkjøring</option>
-                        <option>bilferje</option>
-                        <option>passasjerferje</option>
-                        <option>gangOgSykkelveg</option>
-                        <option>sykkelveg</option>
-                        <option>gangveg</option>
-                        <option>gågate</option>
-                    </select>
-                    <input id="multipletype" type="button" value="Velg flere">
-                </td>
-                <td>&nbsp; Trafikantgruppe:
-                    <select id="roaduserGroup">
-                        <option value="">-- Ingen valgt --</option>
-                        <option value="K">Kjørende</option>
-                        <option value="G">Gående</option>
-                    </select>
-                </td>
+                <td><input type="checkbox" id="connectionLinks" checked="true" value="clear">Konnekteringslenker</td>
+                <td><input type="checkbox" id="detailedLinks" checked="true" value="clear">Detaljerte lenker</td>
+<!--                <td>-->
+<!--                    Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse" size="30">-->
+<!--                    <button type="button" id="resetroadref">X</button>-->
+<!--                </td>-->
                 <td>
-                    &nbsp; Vegsystemreferanse: <input type="text" id="roadsysref" placeholder="Vegsystemreferanse,vegsystemreferanse..." size="50">
-                    <button type="button" id="resetroadref">X</button>
+
                 </td>
             </tr>
         </table>
@@ -116,8 +90,6 @@
             Geometri:
             <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(226778.2 6564468.6 5, 226747.1 6564470.1 5, 226717.5 6564466.4 5, 226705.9 6564462.7 6.2, 226687.2 6564462.9 6, 226657.7 6564460.7 6, 226628.5 6564459.5 6, 226611.3 6564459.6 6.2)</textarea>
             <button id="routeByGeometry">Beregn rute med geometri</button>
-            <button id="drawGeometry">Vis geometri på kart</button>
-            <button id="zoomToGeometry">Zoom til geometri på kart</button>
         </div>
     </form>
 </main>
@@ -125,7 +97,6 @@
 <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
         integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
         crossorigin=""></script>
-<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script src="https://unpkg.com/jquery@3.4.1/dist/jquery.js"></script>
 <script src="https://unpkg.com/terraformer@1.0.7/terraformer.js"></script>
 <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2/terraformer-wkt-parser.js"></script>
