@@ -265,6 +265,28 @@ $("#drawGeometry").click(function(e) {
     });
 });
 
+$("#routeByLinks").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    let start = $('input[name="startlenke"]').val();
+    let slutt = $('input[name="sluttlenke"]').val();
+    let avstand = $('input[name="maksavstand"]').val();
+
+    if (start && slutt) {
+        let urlParams =
+            "?start=" + start
+            + "&slutt=" + slutt
+            + "&maks_avstand=" + avstand
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks()
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
+
+        getData(urlParams);
+    } else {
+        alert("Du må ha fylt ut startlenke og sluttlenke!");
+    }
+});
+
 $("#routeByMarkers").click(function (e) {
     event.preventDefault();
     clearRoute();
@@ -279,13 +301,40 @@ $("#routeByMarkers").click(function (e) {
             + "&maks_avstand=" + avstand
             + "&omkrets=" + omkrets
             + "&konnekteringslenker=" + isConnectionLinks()
-            + "&detaljerte_lenker=" + isDetailedLinks();
+            + "&detaljerte_lenker=" + isDetailedLinks()
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
 
         getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
 });
+
+$("#routeByGeometry").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    let geometri = $.trim($('#geometri').val());
+    let avstand = $('input[name="maksavstand"]').val();
+
+    if (geometri && avstand) {
+        let urlParams =
+            "?geometri=" + geometri
+            + "&maks_avstand=" + avstand
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks()
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
+
+
+        getData(urlParams);
+    } else {
+        alert("Geometri må ha verdi!");
+    }
+});
+
+function getPointInTime() {
+    let time =  $('#pointInTime').val().trim();
+    return time == "" ? null : time;
+}
 
 function getUrlDecodedGeometry() {
     let geometry = decodeURI($('#geometri').val());
@@ -319,44 +368,7 @@ $("#resetroadref").click(function(e) {
     $("#roadsysref").val("");
 });
 
-$("#routeByGeometry").click(function (e) {
-    event.preventDefault();
-    clearRoute();
-    let geometri = $.trim($('#geometri').val());
-    let avstand = $('input[name="maksavstand"]').val();
 
-    if (geometri && avstand) {
-        let urlParams =
-            "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
-            + "&konnekteringslenker=" + isConnectionLinks()
-            + "&detaljerte_lenker=" + isDetailedLinks();
-
-
-        getData(urlParams);
-    } else {
-        alert("Geometri må ha verdi!");
-    }
-});
-
-$("#routeByLinks").click(function (e) {
-    event.preventDefault();
-    clearRoute();
-    let start = $('input[name="startlenke"]').val();
-    let slutt = $('input[name="sluttlenke"]').val();
-    let avstand = $('input[name="maksavstand"]').val();
-
-    if (start && slutt) {
-        let urlParams =
-            "?start=" + start
-            + "&slutt=" + slutt
-            + "&maks_avstand=" + avstand;
-
-        getData(urlParams);
-    } else {
-        alert("Du må ha fylt ut startlenke og sluttlenke!");
-    }
-});
 
 $('#clearRoutes').click(function (e) {
     event.preventDefault();
