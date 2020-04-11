@@ -216,32 +216,34 @@ $("#setMarkers").click(function (e) {
 });
 
 function setMarkers() {
-    let start = $('input[name="startMarker"]').val();
-    let end = $('input[name="endMarker"]').val();
-    layerGroupMarker.clearLayers();
-    endMarker = null;
-    startMarker = null;
-    createEndMarker(convertUTM33ToWGS84LatLong(end));
-    createStartMarker(convertUTM33ToWGS84LatLong(start));
+    try {
+        let start = $('input[name="startMarker"]').val();
+        let end = $('input[name="endMarker"]').val();
+        layerGroupMarker.clearLayers();
+        endMarker = null;
+        startMarker = null;
+        createEndMarker(convertUTM33ToWGS84LatLong(end));
+        createStartMarker(convertUTM33ToWGS84LatLong(start));
+    } catch (e) {
+        alert("Kunne ikke sette markører: " + e)
+    }
 }
 
 $("#zoomToGeometry").click(function(e) {
     event.preventDefault();
-
-    let geometry = getUrlDecodedGeometry();
-
-    // Find points in geometry
-    matches = geometry.match(/(\d+.\d+)/g);
-
-    // Take first point of geometry
-    let x = matches[0];
-    let y = matches[1];
-
-    let point = convertUTM33ToWGS84LatLong( x + ", " + y);
-
-    // Set view to zoom to geometry
-    map.setView([point.latlng.lat, point.latlng.lng], 17);
+    zoomToPosition(getUrlDecodedGeometry());
 });
+
+$("#zoomToStartMarker").click(function(e) {
+    event.preventDefault();
+    zoomToPosition($('input[name="startMarker"]').val());
+});
+
+$("#zoomToEndMarker").click(function(e) {
+    event.preventDefault();
+    zoomToPosition($('input[name="endMarker"]').val());
+});
+
 
 $("#drawGeometry").click(function(e) {
     event.preventDefault();
@@ -249,15 +251,19 @@ $("#drawGeometry").click(function(e) {
 
     geometryDrawn = !geometryDrawn;
 
-    if (geometryDrawn) {
-        let geojson = Terraformer.WKT.parse(getUrlDecodedGeometry());
-        geojson.crs = {
-            'type': 'name',
-            'properties': {
-                'name': 'urn:ogc:def:crs:EPSG::25833'
-            }
-        };
-        L.Proj.geoJson(geojson).addTo(layerGroupGeometry);
+    try {
+        if (geometryDrawn) {
+            let geojson = Terraformer.WKT.parse(getUrlDecodedGeometry());
+            geojson.crs = {
+                'type': 'name',
+                'properties': {
+                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                }
+            };
+            L.Proj.geoJson(geojson).addTo(layerGroupGeometry);
+        }
+    } catch (e) {
+        alert("Feil i geometri: " + e.toString());
     }
 
     layerGroupGeometry.eachLayer(function(layer) {
@@ -330,6 +336,20 @@ $("#routeByGeometry").click(function (e) {
         alert("Geometri må ha verdi!");
     }
 });
+
+function zoomToPosition(geometry) {
+    // Find points in geometry
+    matches = geometry.match(/(\d+\.\d+|\d+)/g);
+
+    // Take first point of geometry
+    let x = matches[0];
+    let y = matches[1];
+
+    let point = convertUTM33ToWGS84LatLong( x + ", " + y);
+
+    // Set view to zoom to geometry
+    map.setView([point.latlng.lat, point.latlng.lng], 17);
+}
 
 function getPointInTime() {
     let time =  $('#pointInTime').val().trim();
