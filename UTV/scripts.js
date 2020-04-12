@@ -178,7 +178,7 @@ function getData(urlParams) {
                             };
                             L.Proj.geoJson(geojson).addTo(layerGroupRoute);
                         });
-                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre parametre som maks_avstand, omkrets...");
                 });
 
             // Detailed segments as text
