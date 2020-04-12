@@ -21,6 +21,9 @@ let layerGroupRoute = L.layerGroup().addTo(map);
 let layerGroupGeometry = L.layerGroup().addTo(map);
 let layerGroupMarker = L.layerGroup().addTo(map);
 
+// Add scale to map (metric scale)
+L.control.scale({imperial:false}).addTo(map);
+
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
 map.addLayer(BACKGROUND_LAYER);
 map.setView([59.132, 10.22], 17);
