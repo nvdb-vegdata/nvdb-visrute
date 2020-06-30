@@ -146,25 +146,30 @@ function setURL(briefURL, requestUrlDiv) {
     }).appendTo($(requestUrlDiv));
 }
 
-function getData(urlParams) {
-    console.log('Fetching ' + urlParams);
+function getData(jsonObject) {
+    console.log('Fetching ' + jsonObject);
 
     if (hasValue('#roadsysref')) {
-        urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+        jsonObject["vegsystemreferanse"] = $('#roadsysref').val();
     }
 
     if (hasValue('#roaduserGroup')) {
-        urlParams += "&trafikantgruppe=" + $('#roaduserGroup').val();
+        jsonObject["trafikantgruppe"] = $('#roaduserGroup').val();
     }
 
     if (hasValues('#typeOfRoad')) {
-        urlParams += "&typeveg=" + $('#typeOfRoad').val();
+        jsonObject["typeveg"] = $('#typeOfRoad').val();
     }
 
-    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
+    jsonObject["pretty"] = true;
+
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON;
 
     // Get the detailed format
-    fetch(url)
+    fetch(url, {
+        method: 'post',
+        body: jsonObject
+    })
         .then(function (response) {
             response.clone().json()
 
@@ -326,15 +331,15 @@ $("#routeByGeometry").click(function (e) {
     let avstand = $('input[name="maksavstand"]').val();
 
     if (geometri && avstand) {
-        let urlParams =
-            "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
-            + "&konnekteringslenker=" + isConnectionLinks()
-            + "&detaljerte_lenker=" + isDetailedLinks()
-            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
+        let jsonObject = {};
 
+        jsonObject["geometri"] = geometri;
+        jsonObject["maks_avstand"] = avstand;
+        jsonObject["konnekteringslenker"] = isConnectionLinks();
+        jsonObject["detaljerte_lenker"] = isDetailedLinks();
+        if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
 
-        getData(urlParams);
+        getData(jsonObject);
     } else {
         alert("Geometri må ha verdi!");
     }
