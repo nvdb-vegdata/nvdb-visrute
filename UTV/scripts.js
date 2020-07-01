@@ -171,7 +171,7 @@ function getData(jsonObject) {
             'Content-Type': 'application/json'
         },
         method: 'post',
-        body: jsonObject
+        body: JSON.stringify(jsonObject)
     })
         .then(function (response) {
             response.clone().json()
