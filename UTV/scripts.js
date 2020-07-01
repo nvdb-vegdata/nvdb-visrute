@@ -167,6 +167,9 @@ function getData(jsonObject) {
 
     // Get the detailed format
     fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
         method: 'post',
         body: jsonObject
     })
