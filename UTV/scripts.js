@@ -201,12 +201,18 @@ function getData(jsonObject) {
         });
 
     // Brief segments as text
-    let briefURL = url + "&kortform=true";
-    fetch(briefURL)
+    jsonObject["kortform"] = true;
+    fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(jsonObject)
+    })
         .then(function (response) {
             return response.text()
                 .then(function (result) {
-                    setURL(briefURL, "#requesturlbrief");
+                    setURL(url, "#requesturlbrief");
                     $('#briefFormatText').text(result);
                 });
         })
