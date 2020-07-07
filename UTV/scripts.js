@@ -167,6 +167,9 @@ function getData(jsonObject) {
 
     // Get the detailed format
     fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
         method: 'post',
         body: JSON.stringify(jsonObject)
     })
@@ -200,6 +203,9 @@ function getData(jsonObject) {
     // Brief segments as text
     jsonObject["kortform"] = true;
     fetch(url, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
         method: 'post',
         body: JSON.stringify(jsonObject)
     })
