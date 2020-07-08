@@ -146,7 +146,65 @@ function setURL(briefURL, requestUrlDiv) {
     }).appendTo($(requestUrlDiv));
 }
 
-function getData(jsonObject) {
+function getData(urlParams) {
+    console.log('Fetching ' + urlParams);
+
+    if (hasValue('#roadsysref')) {
+        urlParams += "&vegsystemreferanse=" + $('#roadsysref').val();
+    }
+
+    if (hasValue('#roaduserGroup')) {
+        urlParams += "&trafikantgruppe=" + $('#roaduserGroup').val();
+    }
+
+    if (hasValues('#typeOfRoad')) {
+        urlParams += "&typeveg=" + $('#typeOfRoad').val();
+    }
+
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
+
+    // Get the detailed format
+    fetch(url)
+        .then(function (response) {
+            response.clone().json()
+
+                // Detailed segments drawn in map
+                .then(function (result) {
+                    result.flatMap(o => o.geometri.wkt)
+                        .map(wkt => Terraformer.WKT.parse(wkt))
+                        .forEach(geojson => {
+                            geojson.crs = {
+                                'type': 'name',
+                                'properties': {
+                                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                                }
+                            };
+                            L.Proj.geoJson(geojson).addTo(layerGroupRoute);
+                        });
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre parametre som maks_avstand, omkrets...");
+                });
+
+            // Detailed segments as text
+            response.text()
+                .then(function (result) {
+                    setURL(url, "#requesturldetailed");
+                    $('#detailedFormatText').text(result);
+                });
+        });
+
+    // Brief segments as text
+    let briefURL = url + "&kortform=true";
+    fetch(briefURL)
+        .then(function (response) {
+            return response.text()
+                .then(function (result) {
+                    setURL(briefURL, "#requesturlbrief");
+                    $('#briefFormatText').text(result);
+                });
+        })
+}
+
+function getDataByPost(jsonObject) {
     console.log('Fetching ' + jsonObject);
 
     if (hasValue('#roadsysref')) {
@@ -348,7 +406,7 @@ $("#routeByGeometry").click(function (e) {
         jsonObject["detaljerte_lenker"] = isDetailedLinks();
         if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
 
-        getData(jsonObject);
+        getDataByPost(jsonObject);
     } else {
         alert("Geometri må ha verdi!");
     }
