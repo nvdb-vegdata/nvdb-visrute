@@ -360,7 +360,9 @@ $("#routeByLinks").click(function (e) {
             + "&maks_avstand=" + avstand
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks()
-            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
+            + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
+            + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
 
         getData(urlParams);
     } else {
@@ -383,7 +385,9 @@ $("#routeByMarkers").click(function (e) {
             + "&omkrets=" + omkrets
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks()
-            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime());
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
+            + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
+            + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
 
         getData(urlParams);
     } else {
@@ -405,6 +409,8 @@ $("#routeByGeometry").click(function (e) {
         jsonObject["konnekteringslenker"] = isConnectionLinks();
         jsonObject["detaljerte_lenker"] = isDetailedLinks();
         if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
+        if(getStartPointInTime() != null)  jsonObject["tidspunkt_start"] = getStartPointInTime();
+        if(getEndPointInTime() != null)  jsonObject["tidspunkt_slutt"] = getEndPointInTime();
 
         getDataByPost(jsonObject);
     } else {
@@ -428,7 +434,17 @@ function zoomToPosition(geometry) {
 
 function getPointInTime() {
     let time =  $('#pointInTime').val().trim();
-    return time == "" ? null : time;
+    return time === "" ? null : time;
+}
+
+function getStartPointInTime() {
+    let time =  $('#startPointInTime').val().trim();
+    return time === "" ? null : time;
+}
+
+function getEndPointInTime() {
+    let time =  $('#endPointInTime').val().trim();
+    return time === "" ? null : time;
 }
 
 function getUrlDecodedGeometry() {

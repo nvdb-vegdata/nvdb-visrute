@@ -59,9 +59,30 @@
             </tr>
             <tr>
                 <td>
-                    <input type="checkbox" id="showMarkerPos">Vis markør koordinater i
-                    <input type="radio" name="markercoord" id="POS_UTM33" checked="true">UTM 33
-                    <input type="radio" name="markercoord" id="POS_WGS84">WGS 84
+                    <div>
+                        <label for="pointInTime">Tidspunkt: </label>
+                        <input id="pointInTime" type="date">
+                        <label for="pointInTime">Tidspunkt Start: </label>
+                        <input id="startPointInTime" type="date">
+                        <label for="pointInTime">Tidspunkt Slutt: </label>
+                        <input id="endPointInTime" type="date">
+                    </div>
+                </td>
+                <td>
+                    <input id="connectionLinks" type="checkbox" value="clear" checked>
+                    <label for="connectionLinks">Konnekteringslenker</label>
+                </td>
+                <td>
+                    <input id="detailedLinks" type="checkbox" value="clear" checked>
+                    <label for="detailedLinks">Detaljerte lenker</label>
+                </td>
+                <td>
+                    <input id="showMarkerPos" type="checkbox">
+                    <label for="showMarkerPos">Vis markør-koordinater i</label>
+                    <input id="POS_UTM33" type="radio" name="markercoord" checked="true">
+                    <label for="POS_UTM33">UTM 33</label>
+                    <input id="POS_WGS84" type="radio" name="markercoord">
+                    <label for="POS_WGS84">WGS 84</label>
                 </td>
             </tr>
         </table>
