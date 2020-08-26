@@ -170,7 +170,7 @@ function getData(urlParams) {
 
                 // Detailed segments drawn in map
                 .then(function (result) {
-                    result.flatMap(o => o.geometri.wkt)
+                    result.vegnettsrutesegmenter.flatMap(o => o.geometri.wkt)
                         .map(wkt => Terraformer.WKT.parse(wkt))
                         .forEach(geojson => {
                             geojson.crs = {
@@ -236,7 +236,7 @@ function getDataByPost(jsonObject) {
 
                 // Detailed segments drawn in map
                 .then(function (result) {
-                    result.flatMap(o => o.geometri.wkt)
+                    result.vegnettsrutesegmenter.flatMap(o => o.geometri.wkt)
                         .map(wkt => Terraformer.WKT.parse(wkt))
                         .forEach(geojson => {
                             geojson.crs = {
