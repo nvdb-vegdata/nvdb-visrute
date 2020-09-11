@@ -21,6 +21,9 @@ let layerGroupRoute = L.layerGroup().addTo(map);
 let layerGroupGeometry = L.layerGroup().addTo(map);
 let layerGroupMarker = L.layerGroup().addTo(map);
 
+// Add scale to map (metric scale)
+L.control.scale({imperial:false}).addTo(map);
+
 // addLayer legger til et kartlag, i dette tilfellet kartdataene som viser verdenskartet.
 map.addLayer(BACKGROUND_LAYER);
 map.setView([59.132, 10.22], 17);
@@ -161,13 +164,17 @@ function getData(urlParams) {
     let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
 
     // Get the detailed format
-    fetch(url)
+    fetch(url, {
+        headers: {
+            'X-Client': 'nvdb-visrute'
+        }
+    })
         .then(function (response) {
             response.clone().json()
 
                 // Detailed segments drawn in map
                 .then(function (result) {
-                    result.flatMap(o => o.geometri.wkt)
+                    result.vegnettsrutesegmenter.flatMap(o => o.geometri.wkt)
                         .map(wkt => Terraformer.WKT.parse(wkt))
                         .forEach(geojson => {
                             geojson.crs = {
@@ -178,7 +185,7 @@ function getData(urlParams) {
                             };
                             L.Proj.geoJson(geojson).addTo(layerGroupRoute);
                         });
-                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre maks_avstand og/eller ramme. ");
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre parametre som maks_avstand, omkrets...");
                 });
 
             // Detailed segments as text
@@ -191,11 +198,89 @@ function getData(urlParams) {
 
     // Brief segments as text
     let briefURL = url + "&kortform=true";
-    fetch(briefURL)
+    fetch(briefURL, {
+        headers: {
+            'X-Client': 'nvdb-visrute'
+        }
+    })
         .then(function (response) {
             return response.text()
                 .then(function (result) {
                     setURL(briefURL, "#requesturlbrief");
+                    $('#briefFormatText').text(result);
+                });
+        })
+}
+
+function getDataByPost(jsonObject) {
+    console.log('Fetching ' + jsonObject);
+
+    if (hasValue('#roadsysref')) {
+        jsonObject["vegsystemreferanse"] = $('#roadsysref').val();
+    }
+
+    if (hasValue('#roaduserGroup')) {
+        jsonObject["trafikantgruppe"] = $('#roaduserGroup').val();
+    }
+
+    if (hasValues('#typeOfRoad')) {
+        jsonObject["typeveg"] = $('#typeOfRoad').val();
+    }
+
+    jsonObject["pretty"] = true;
+
+    let url = getServerUrl() + ROUTE_SERVICEPATH_JSON;
+
+    // Get the detailed format
+    fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Client': 'nvdb-visrute'
+        },
+        method: 'post',
+        body: JSON.stringify(jsonObject)
+    })
+        .then(function (response) {
+            response.clone().json()
+
+                // Detailed segments drawn in map
+                .then(function (result) {
+                    result.vegnettsrutesegmenter.flatMap(o => o.geometri.wkt)
+                        .map(wkt => Terraformer.WKT.parse(wkt))
+                        .forEach(geojson => {
+                            geojson.crs = {
+                                'type': 'name',
+                                'properties': {
+                                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                                }
+                            };
+                            L.Proj.geoJson(geojson).addTo(layerGroupRoute);
+                        });
+                    if (result.length == 0) alert("Fant ingen rute!   Forsøk å endre parametre som maks_avstand, omkrets...");
+                });
+
+            // Detailed segments as text
+            response.text()
+                .then(function (result) {
+                    setURL(url, "#requesturldetailed");
+                    $('#detailedFormatText').text(result);
+                });
+        });
+
+    // Brief segments as text
+    jsonObject["kortform"] = true;
+    fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Client': 'nvdb-visrute'
+        },
+        method: 'post',
+        body: JSON.stringify(jsonObject)
+    })
+        .then(function (response) {
+            return response.text()
+                .then(function (result) {
+                    setURL(url, "#requesturlbrief");
                     $('#briefFormatText').text(result);
                 });
         })
@@ -216,32 +301,34 @@ $("#setMarkers").click(function (e) {
 });
 
 function setMarkers() {
-    let start = $('input[name="startMarker"]').val();
-    let end = $('input[name="endMarker"]').val();
-    layerGroupMarker.clearLayers();
-    endMarker = null;
-    startMarker = null;
-    createEndMarker(convertUTM33ToWGS84LatLong(end));
-    createStartMarker(convertUTM33ToWGS84LatLong(start));
+    try {
+        let start = $('input[name="startMarker"]').val();
+        let end = $('input[name="endMarker"]').val();
+        layerGroupMarker.clearLayers();
+        endMarker = null;
+        startMarker = null;
+        createEndMarker(convertUTM33ToWGS84LatLong(end));
+        createStartMarker(convertUTM33ToWGS84LatLong(start));
+    } catch (e) {
+        alert("Kunne ikke sette markører: " + e)
+    }
 }
 
 $("#zoomToGeometry").click(function(e) {
     event.preventDefault();
-
-    let geometry = getUrlDecodedGeometry();
-
-    // Find points in geometry
-    matches = geometry.match(/(\d+.\d+)/g);
-
-    // Take first point of geometry
-    let x = matches[0];
-    let y = matches[1];
-
-    let point = convertUTM33ToWGS84LatLong( x + ", " + y);
-
-    // Set view to zoom to geometry
-    map.setView([point.latlng.lat, point.latlng.lng], 17);
+    zoomToPosition(getUrlDecodedGeometry());
 });
+
+$("#zoomToStartMarker").click(function(e) {
+    event.preventDefault();
+    zoomToPosition($('input[name="startMarker"]').val());
+});
+
+$("#zoomToEndMarker").click(function(e) {
+    event.preventDefault();
+    zoomToPosition($('input[name="endMarker"]').val());
+});
+
 
 $("#drawGeometry").click(function(e) {
     event.preventDefault();
@@ -249,20 +336,48 @@ $("#drawGeometry").click(function(e) {
 
     geometryDrawn = !geometryDrawn;
 
-    if (geometryDrawn) {
-        let geojson = Terraformer.WKT.parse(getUrlDecodedGeometry());
-        geojson.crs = {
-            'type': 'name',
-            'properties': {
-                'name': 'urn:ogc:def:crs:EPSG::25833'
-            }
-        };
-        L.Proj.geoJson(geojson).addTo(layerGroupGeometry);
+    try {
+        if (geometryDrawn) {
+            let geojson = Terraformer.WKT.parse(getUrlDecodedGeometry());
+            geojson.crs = {
+                'type': 'name',
+                'properties': {
+                    'name': 'urn:ogc:def:crs:EPSG::25833'
+                }
+            };
+            L.Proj.geoJson(geojson).addTo(layerGroupGeometry);
+        }
+    } catch (e) {
+        alert("Feil i geometri: " + e.toString());
     }
 
     layerGroupGeometry.eachLayer(function(layer) {
         layer.setStyle({color :'yellow'})
     });
+});
+
+$("#routeByLinks").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    let start = $('input[name="startlenke"]').val();
+    let slutt = $('input[name="sluttlenke"]').val();
+    let avstand = $('input[name="maksavstand"]').val();
+
+    if (start && slutt) {
+        let urlParams =
+            "?start=" + start
+            + "&slutt=" + slutt
+            + "&maks_avstand=" + avstand
+            + "&konnekteringslenker=" + isConnectionLinks()
+            + "&detaljerte_lenker=" + isDetailedLinks()
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
+            + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
+            + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
+
+        getData(urlParams);
+    } else {
+        alert("Du må ha fylt ut startlenke og sluttlenke!");
+    }
 });
 
 $("#routeByMarkers").click(function (e) {
@@ -279,13 +394,68 @@ $("#routeByMarkers").click(function (e) {
             + "&maks_avstand=" + avstand
             + "&omkrets=" + omkrets
             + "&konnekteringslenker=" + isConnectionLinks()
-            + "&detaljerte_lenker=" + isDetailedLinks();
+            + "&detaljerte_lenker=" + isDetailedLinks()
+            + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
+            + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
+            + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
 
         getData(urlParams);
     } else {
         alert("Klikk i kartet for å angi start og slutt-merke for å beregne rute!");
     }
 });
+
+$("#routeByGeometry").click(function (e) {
+    event.preventDefault();
+    clearRoute();
+    let geometri = $.trim($('#geometri').val());
+    let avstand = $('input[name="maksavstand"]').val();
+
+    if (geometri && avstand) {
+        let jsonObject = {};
+
+        jsonObject["geometri"] = geometri;
+        jsonObject["maks_avstand"] = avstand;
+        jsonObject["konnekteringslenker"] = isConnectionLinks();
+        jsonObject["detaljerte_lenker"] = isDetailedLinks();
+        if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
+        if(getStartPointInTime() != null)  jsonObject["tidspunkt_start"] = getStartPointInTime();
+        if(getEndPointInTime() != null)  jsonObject["tidspunkt_slutt"] = getEndPointInTime();
+
+        getDataByPost(jsonObject);
+    } else {
+        alert("Geometri må ha verdi!");
+    }
+});
+
+function zoomToPosition(geometry) {
+    // Find points in geometry
+    matches = geometry.match(/(\d+\.\d+|\d+)/g);
+
+    // Take first point of geometry
+    let x = matches[0];
+    let y = matches[1];
+
+    let point = convertUTM33ToWGS84LatLong( x + ", " + y);
+
+    // Set view to zoom to geometry
+    map.setView([point.latlng.lat, point.latlng.lng], 17);
+}
+
+function getPointInTime() {
+    let time =  $('#pointInTime').val().trim();
+    return time === "" ? null : time;
+}
+
+function getStartPointInTime() {
+    let time =  $('#startPointInTime').val().trim();
+    return time === "" ? null : time;
+}
+
+function getEndPointInTime() {
+    let time =  $('#endPointInTime').val().trim();
+    return time === "" ? null : time;
+}
 
 function getUrlDecodedGeometry() {
     let geometry = decodeURI($('#geometri').val());
@@ -319,44 +489,7 @@ $("#resetroadref").click(function(e) {
     $("#roadsysref").val("");
 });
 
-$("#routeByGeometry").click(function (e) {
-    event.preventDefault();
-    clearRoute();
-    let geometri = $.trim($('#geometri').val());
-    let avstand = $('input[name="maksavstand"]').val();
 
-    if (geometri && avstand) {
-        let urlParams =
-            "?geometri=" + geometri
-            + "&maks_avstand=" + avstand
-            + "&konnekteringslenker=" + isConnectionLinks()
-            + "&detaljerte_lenker=" + isDetailedLinks();
-
-
-        getData(urlParams);
-    } else {
-        alert("Geometri må ha verdi!");
-    }
-});
-
-$("#routeByLinks").click(function (e) {
-    event.preventDefault();
-    clearRoute();
-    let start = $('input[name="startlenke"]').val();
-    let slutt = $('input[name="sluttlenke"]').val();
-    let avstand = $('input[name="maksavstand"]').val();
-
-    if (start && slutt) {
-        let urlParams =
-            "?start=" + start
-            + "&slutt=" + slutt
-            + "&maks_avstand=" + avstand;
-
-        getData(urlParams);
-    } else {
-        alert("Du må ha fylt ut startlenke og sluttlenke!");
-    }
-});
 
 $('#clearRoutes').click(function (e) {
     event.preventDefault();

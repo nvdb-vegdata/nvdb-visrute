@@ -164,7 +164,11 @@ function getData(urlParams) {
     let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
 
     // Get the detailed format
-    fetch(url)
+    fetch(url, {
+        headers: {
+            'X-Client': 'nvdb-visrute'
+        }
+    })
         .then(function (response) {
             response.clone().json()
 
@@ -194,7 +198,11 @@ function getData(urlParams) {
 
     // Brief segments as text
     let briefURL = url + "&kortform=true";
-    fetch(briefURL)
+    fetch(briefURL, {
+        headers: {
+            'X-Client': 'nvdb-visrute'
+        }
+    })
         .then(function (response) {
             return response.text()
                 .then(function (result) {
@@ -226,7 +234,8 @@ function getDataByPost(jsonObject) {
     // Get the detailed format
     fetch(url, {
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Client': 'nvdb-visrute'
         },
         method: 'post',
         body: JSON.stringify(jsonObject)
@@ -262,7 +271,8 @@ function getDataByPost(jsonObject) {
     jsonObject["kortform"] = true;
     fetch(url, {
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Client': 'nvdb-visrute'
         },
         method: 'post',
         body: JSON.stringify(jsonObject)
