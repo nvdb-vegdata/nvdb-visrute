@@ -10,24 +10,177 @@
           integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
           crossorigin=""/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
-    <style>
-        #map {height: 500px; width: 70%; float: left; }
-        #response {height: 500px; width: 30%; float: right; }
-        #responsetext {height: 450px; overflow: scroll; }
-    </style>
+    <link rel="stylesheet" href="styles.css"/>
 </head>
 
 <body>
 <main>
-    <div>
+    <div id="mapAndFormContainer">
         <div id="map"></div>
+        <div class="divider horizontal"></div>
+        <div id="formContainer">
+            <form action="#">
+                <div>
+                    <div id="refLinksContainer">
+                        <div>
+                            <label for="startlenke">Startlenke: </label>
+                            <input id="startlenke" type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.46171863@1148712">
+                        </div>
+                        <div>
+                            <label for="sluttlenke">Sluttlenke: </label>
+                            <input id="sluttlenke" type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.73627156@1148885">
+                        </div>
+                        <button id="routeByLinks">Beregn rute med start- og slutt-lenkeposisjoner</button>
+                    </div>
+                </div>
+                <hr>
+                <div id="pointInputContainer">
+                    <div>
+                        <label for="startMarker">Start-markør (x,y): </label>
+                        <input id="startMarker" type="text" name="startMarker" placeholder="x,y" size="35" value="226599.12226756767,6564564.394604767">
+                    </div>
+                    <div>
+                        <label for="endMarker">Slutt-markør (x,y): </label>
+                        <input id="endMarker" type="text" name="endMarker" placeholder="x,y" size="35" value="226696.13838754396,6564542.670789175">
+                    </div>
+                </div>
+                <div id="pointActionContainer">
+                    <button id="zoomToStartMarker">Zoom til startmarkør</button>
+                    <button id="zoomToEndMarker">Zoom til sluttmarkør</button>
+                    <button id="setMarkers">Sett markører</button>
+                    <button id="clearMarkers">Fjern start- og slutt-markør</button>
+                    <button id="routeByMarkers">Beregn rute med markører</button>
+                </div>
+                <div id="pointProjectionContainer">
+                    <input id="showMarkerPos" type="checkbox">
+                    <label for="showMarkerPos">Vis markør-koordinater i</label>
+                    <input id="POS_UTM33" type="radio" name="markercoord" checked="true">
+                    <label for="POS_UTM33">UTM 33</label>
+                    <input id="POS_WGS84" type="radio" name="markercoord">
+                    <label for="POS_WGS84">WGS 84</label>
+                </div>
+                <hr>
+                <div id="geometryContainer">
+                    <div id="geometryInputContainer">
+                        <label for="geometri">Geometri:</label>
+                        <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(226778.2 6564468.6 5, 226747.1 6564470.1 5, 226717.5 6564466.4 5, 226705.9 6564462.7 6.2, 226687.2 6564462.9 6, 226657.7 6564460.7 6, 226628.5 6564459.5 6, 226611.3 6564459.6 6.2)</textarea>
+                    </div>
+                    <div id="geometryActionContainer">
+                        <button id="drawGeometry">"Vis / Ikke vis" geometri på kart</button>
+                        <button id="zoomToGeometry">Zoom til geometri på kart</button>
+                        <button id="routeByGeometry">Beregn rute med geometri</button>
+                    </div>
+                </div>
+                <div class="divider horizontal"></div>
+                <div id="distanceAndEnvelopeInput">
+                    <div>
+                        <label for="maksavstand">Maks avstand til start- og sluttpunkt i meter: </label>
+                        <input id="maksavstand" type="text" name="maksavstand" placeholder="avstand" value="10">
+                    </div>
+                    <div>
+                        <label for="omkrets">Rektangulær omkrets rundt punkter på meter: </label>
+                        <input id="omkrets" type="text" name="omkrets" placeholder="omkrets" value="100">
+                    </div>
+                </div>
+                <div class="divider horizontal"></div>
+                <div id="filteringInput">
+                    <div id="connectionAndDetailedLinks">
+                        <div>
+                            <input id="connectionLinks" type="checkbox" value="clear" checked>
+                            <label for="connectionLinks">Konnekteringslenker</label>
+                        </div>
+                        <div>
+                            <input id="detailedLinks" type="checkbox" value="clear">
+                            <label for="detailedLinks">Detaljerte lenker</label>
+                        </div>
+                        <div class="divider vertical small"></div>
+                        <div>
+                            <label for="roadsysref">Vegsystemreferanse: </label>
+                            <input id="roadsysref" type="text" placeholder="Vegsystemreferanse,vegsystemreferanse..." size="50">
+                            <button id="resetroadref" type="button">X</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="typeOfRoadAndRoadUserGroup">
+                        <div>
+                            <label for="typeOfRoad">Typeveg:</label>
+                            <select id="typeOfRoad">
+                                <option value="">-- Ingen valgt --</option>
+                                <option>kanalisertVeg</option>
+                                <option>enkelBilveg</option>
+                                <option>rampe</option>
+                                <option>rundkjøring</option>
+                                <option>bilferje</option>
+                                <option>passasjerferje</option>
+                                <option>gangOgSykkelveg</option>
+                                <option>sykkelveg</option>
+                                <option>gangveg</option>
+                                <option>gågate</option>
+                            </select>
+                            <input id="multipletype" type="button" value="Velg flere">
+                        </div>
+                        <div class="divider vertical small"></div>
+                        <div>
+                            <label for="roaduserGroup">Trafikantgruppe:</label>
+                            <select id="roaduserGroup">
+                                <option value="">-- Ingen valgt --</option>
+                                <option value="K">Kjørende</option>
+                                <option value="G">Gående</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider horizontal"></div>
+                <div id="timeInput">
+                    <div>
+                        <label for="pointInTime">Tidspunkt: </label>
+                        <input id="pointInTime" type="date">
+                    </div>
+                    <div class="divider vertical small"></div>
+                    <div>
+                        <label for="startPointInTime">Tidspunkt Start: </label>
+                        <input id="startPointInTime" type="date">
+                    </div>
+                    <div>
+                        <label for="endPointInTime">Tidspunkt Slutt: </label>
+                        <input id="endPointInTime" type="date">
+                    </div>
+                </div>
+
+
+                <table>
+                    <tr>
+
+                        <td>
+
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="divider vertical"></div>
+    <div id="responseContainer">
         <div id="response">
-            Vis respons i
-            <input id="briefResponseFormat" type="radio" name="respformat" checked>
-            <label for="briefResponseFormat">Kort format</label>
-            <input id="detailedResponseFormat" type="radio" name="respformat">
-            <label for="detailedResponseFormat">Detaljert format</label>
+            <div id="serverInput">
+                <label for="server">Server:</label>
+                <select id="server"></select>
+            </div>
             <hr>
+            <div id="responseOptions">
+                <div>
+                    Vis respons i
+                    <input id="briefResponseFormat" type="radio" name="respformat" checked>
+                    <label for="briefResponseFormat">Kort format</label>
+                    <input id="detailedResponseFormat" type="radio" name="respformat">
+                    <label for="detailedResponseFormat">Detaljert format</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="clearRoute" checked>
+                    <label for="clearRoute">Slett beregnede ruter</label>
+                </div>
+            </div>
+            <div class="divider horizontal"></div>
             <div id="responsetext">
                 <div id="briefFormat">
                     <div id="requesturlbrief"></div>
@@ -40,122 +193,6 @@
             </div>
         </div>
     </div>
-    <form action="#">
-        <table>
-            <tr>
-                <td>
-                    <label for="server">Server:</label>
-                    <select id="server"></select>
-                </td>
-                <td>
-                    <label for="maksavstand">Maks_avstand til lenke i meter: </label>
-                    <input id="maksavstand" type="text" name="maksavstand" placeholder="avstand" value="10">
-                </td>
-                <td>
-                    <input type="checkbox" id="clearRoute" checked>
-                    <label for="clearRoute">Slett beregnede ruter</label>
-                </td>
-
-            </tr>
-            <tr>
-                <td>
-                    <div>
-                        <label for="pointInTime">Tidspunkt: </label>
-                        <input id="pointInTime" type="date">
-                        <label for="pointInTime">Tidspunkt Start: </label>
-                        <input id="startPointInTime" type="date">
-                        <label for="pointInTime">Tidspunkt Slutt: </label>
-                        <input id="endPointInTime" type="date">
-                    </div>
-                </td>
-                <td>
-                    <input id="connectionLinks" type="checkbox" value="clear" checked>
-                    <label for="connectionLinks">Konnekteringslenker</label>
-                </td>
-                <td>
-                    <input id="detailedLinks" type="checkbox" value="clear">
-                    <label for="detailedLinks">Detaljerte lenker</label>
-                </td>
-                <td>
-                    <input id="showMarkerPos" type="checkbox">
-                    <label for="showMarkerPos">Vis markør-koordinater i</label>
-                    <input id="POS_UTM33" type="radio" name="markercoord" checked="true">
-                    <label for="POS_UTM33">UTM 33</label>
-                    <input id="POS_WGS84" type="radio" name="markercoord">
-                    <label for="POS_WGS84">WGS 84</label>
-                </td>
-            </tr>
-        </table>
-
-        <table>
-            <tr>
-                <td>
-                    <label for="typeOfRoad">Typeveg:</label>
-                    <select id="typeOfRoad">
-                        <option value="">-- Ingen valgt --</option>
-                        <option>kanalisertVeg</option>
-                        <option>enkelBilveg</option>
-                        <option>rampe</option>
-                        <option>rundkjøring</option>
-                        <option>bilferje</option>
-                        <option>passasjerferje</option>
-                        <option>gangOgSykkelveg</option>
-                        <option>sykkelveg</option>
-                        <option>gangveg</option>
-                        <option>gågate</option>
-                    </select>
-                    <input id="multipletype" type="button" value="Velg flere">
-                </td>
-                <td>
-                    <label for="roaduserGroup">Trafikantgruppe:</label>
-                    <select id="roaduserGroup">
-                        <option value="">-- Ingen valgt --</option>
-                        <option value="K">Kjørende</option>
-                        <option value="G">Gående</option>
-                    </select>
-                </td>
-                <td>
-                    <label for="roadsysref">Vegsystemreferanse: </label>
-                    <input id="roadsysref" type="text" placeholder="Vegsystemreferanse,vegsystemreferanse..." size="50">
-                    <button id="resetroadref" type="button">X</button>
-                </td>
-            </tr>
-        </table>
-        <hr>
-        <div>
-            <label for="startlenke">Startlenke: </label>
-            <input id="startlenke" type="text" name="startlenke" placeholder="startposisjon@veglenkesekvens" value="0.46171863@1148712">
-            <label for="sluttlenke">Sluttlenke: </label>
-            <input id="sluttlenke" type="text" name="sluttlenke" placeholder="sluttposisjon@veglenkesekvens" value="0.73627156@1148885">
-            <button id="routeByLinks">Beregn rute med start- og slutt-lenkeposisjoner</button>
-        </div>
-        <hr>
-        <div>
-            <label for="omkrets">Omkrets rundt punkter på meter: </label>
-            <input id="omkrets" type="text" name="omkrets" placeholder="omkrets" value="100">
-        </div>
-        <div>
-            <label for="startMarker">Start markør (x,y): </label>
-            <input id="startMarker" type="text" name="startMarker" placeholder="x,y" size="35" value="226599.12226756767,6564564.394604767">
-            <button id="setMarkers">Set markører</button>
-            <button id="clearMarkers">Fjern start- og slutt-markør</button>
-            <button id="zoomToStartMarker">Zoom til startmarkør</button>
-            <button id="zoomToEndMarker">Zoom til sluttmarkør</button>
-        </div>
-        <div>
-            <label for="endMarker">Slutt markør (x,y): </label>
-            <input id="endMarker" type="text" name="endMarker" placeholder="x,y" size="35" value="226696.13838754396,6564542.670789175">
-            <button id="routeByMarkers">Beregn rute med markører</button>
-        </div>
-        <hr>
-        <div>
-            <label for="geometri">Geometri:</label>
-            <textarea id="geometri" placeholder="WKT" rows="2" cols="100">LINESTRING Z(226778.2 6564468.6 5, 226747.1 6564470.1 5, 226717.5 6564466.4 5, 226705.9 6564462.7 6.2, 226687.2 6564462.9 6, 226657.7 6564460.7 6, 226628.5 6564459.5 6, 226611.3 6564459.6 6.2)</textarea>
-            <button id="routeByGeometry">Beregn rute med geometri</button>
-            <button id="drawGeometry">"Vis / Ikke vis" geometri på kart</button>
-            <button id="zoomToGeometry">Zoom til geometri på kart</button>
-        </div>
-    </form>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
