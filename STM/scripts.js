@@ -410,12 +410,14 @@ $("#routeByGeometry").click(function (e) {
     clearRoute();
     let geometri = $.trim($('#geometri').val());
     let avstand = $('input[name="maksavstand"]').val();
+    let omkrets = $('input[name="omkrets"]').val();
 
     if (geometri && avstand) {
         let jsonObject = {};
 
         jsonObject["geometri"] = geometri;
         jsonObject["maks_avstand"] = avstand;
+        jsonObject["omkrets"] = omkrets;
         jsonObject["konnekteringslenker"] = isConnectionLinks();
         jsonObject["detaljerte_lenker"] = isDetailedLinks();
         if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
