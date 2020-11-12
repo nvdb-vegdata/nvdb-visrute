@@ -370,6 +370,7 @@ $("#routeByLinks").click(function (e) {
             + "&maks_avstand=" + avstand
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks()
+            + "&behold_trafikantgruppe=" + isKeepRoadUserGroup()
             + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
             + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
             + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
@@ -395,6 +396,7 @@ $("#routeByMarkers").click(function (e) {
             + "&omkrets=" + omkrets
             + "&konnekteringslenker=" + isConnectionLinks()
             + "&detaljerte_lenker=" + isDetailedLinks()
+            + "&behold_trafikantgruppe=" + isKeepRoadUserGroup()
             + (getPointInTime() == null ? "" : "&tidspunkt=" + getPointInTime())
             + (getStartPointInTime() == null ? "" : "&tidspunkt_start=" + getStartPointInTime())
             + (getEndPointInTime() == null ? "" : "&tidspunkt_slutt=" + getEndPointInTime());
@@ -420,6 +422,7 @@ $("#routeByGeometry").click(function (e) {
         jsonObject["omkrets"] = omkrets;
         jsonObject["konnekteringslenker"] = isConnectionLinks();
         jsonObject["detaljerte_lenker"] = isDetailedLinks();
+        jsonObject["behold_trafikantgruppe"] = isKeepRoadUserGroup();
         if(getPointInTime() != null)  jsonObject["tidspunkt"] = getPointInTime();
         if(getStartPointInTime() != null)  jsonObject["tidspunkt_start"] = getStartPointInTime();
         if(getEndPointInTime() != null)  jsonObject["tidspunkt_slutt"] = getEndPointInTime();
@@ -536,6 +539,10 @@ function isConnectionLinks() {
 
 function isDetailedLinks() {
     return $('#detailedLinks').is(':checked');
+}
+
+function isKeepRoadUserGroup() {
+    return $('#keepRoaduserGroup').is(':checked');
 }
 
 function tooltipLatLng(latlong) {
