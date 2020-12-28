@@ -158,7 +158,7 @@ function getData(urlParams) {
     }
 
     if (hasValues('#typeOfRoad')) {
-        urlParams += "&typeveg=" + $('#typeOfRoad').val();
+        urlParams += "&typeveg=" + $('#typeOfRoad').val().toString();
     }
 
     let url = getServerUrl() + ROUTE_SERVICEPATH_JSON + urlParams + "&pretty=true";
@@ -224,7 +224,7 @@ function getDataByPost(jsonObject) {
     }
 
     if (hasValues('#typeOfRoad')) {
-        jsonObject["typeveg"] = $('#typeOfRoad').val();
+        jsonObject["typeveg"] = $('#typeOfRoad').val().toString();
     }
 
     jsonObject["pretty"] = true;
