@@ -7,7 +7,7 @@ const BACKGROUND_LAYER = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tile
     tileSize: 512,
     zoomOffset: -1,
     id: 'mapbox/streets-v11',
-    accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    accessToken: 'pk.eyJ1IjoiaGFuc2d1IiwiYSI6ImNsZnMxZ3Q3dTAxdWoza21oNm9leXh3N3YifQ.6u6nCjaWIUnkM-0I-7OaKA'
 });
 
 const WGS84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
