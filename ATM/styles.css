@@ -18,6 +18,10 @@ textarea {
     max-height: 200px;
 }
 
+#accessibility a {
+    float: right;
+}
+
 #mapAndFormContainer {
     flex: 2;
     display: flex;
