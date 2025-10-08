@@ -1,11 +1,11 @@
 let serverURLs = [
   {
-    url: 'https://nvdbapiles-v3.utv.atlas.vegvesen.no',
-    label: 'https://nvdbapiles-v3.utv.atlas.vegvesen.no (UTV)',
+    url: 'https://nvdbapiles.utv.atlas.vegvesen.no',
+    label: 'https://nvdbapiles.utv.atlas.vegvesen.no (Les V4 STM)',
   },
   {
-    url: 'https://nvdbapiles.utv.atlas.vegvesen.no',
-    label: 'https://nvdbapiles.utv.atlas.vegvesen.no (V4 UTV)',
+    url: 'https://nvdbapiles-v3.utv.atlas.vegvesen.no',
+    label: 'https://nvdbapiles-v3.utv.atlas.vegvesen.no (Les V3 UTV)',
   },
   {
     url: 'http://localhost:12002',
