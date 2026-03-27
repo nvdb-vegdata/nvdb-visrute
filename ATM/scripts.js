@@ -194,7 +194,12 @@ function getData(urlParams) {
             response.text()
                 .then(function (result) {
                     setURL(url, "#requesturldetailed");
-                    $('#detailedFormatText').text(result);
+                    try {
+                        $('#detailedFormatText').text(JSON.stringify(JSON.parse(result), null, 2));
+                    } catch (e) {
+                        $('#detailedFormatText').text(result);
+                    }
+
                 });
         });
 
@@ -207,9 +212,13 @@ function getData(urlParams) {
     })
         .then(function (response) {
             return response.text()
-                .then(function (result) {
+               .then(function (result) {
                     setURL(briefURL, "#requesturlbrief");
-                    $('#briefFormatText').text(result);
+                    try {
+                        $('#briefFormatText').text(JSON.stringify(JSON.parse(result), null, 2));
+                    } catch (e) {
+                        $('#briefFormatText').text(result);
+                    }
                 });
         })
 }
@@ -265,7 +274,11 @@ function getDataByPost(jsonObject) {
             response.text()
                 .then(function (result) {
                     setURL(url, "#requesturldetailed");
-                    $('#detailedFormatText').text(result);
+                    try {
+                        $('#detailedFormatText').text(JSON.stringify(JSON.parse(result), null, 2));
+                    } catch (e) {
+                        $('#detailedFormatText').text(result);
+                    }
                 });
         });
 
@@ -283,7 +296,7 @@ function getDataByPost(jsonObject) {
             return response.text()
                 .then(function (result) {
                     setURL(url, "#requesturlbrief");
-                    $('#briefFormatText').text(result);
+                    $('#briefFormatText').text(JSON.stringify(JSON.parse(result), null, 2));
                 });
         })
 }
